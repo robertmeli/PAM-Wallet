@@ -181,6 +181,6 @@ AI-assisted process notes are documented in:
 
 - `docs/ENGINEERING_JOURNAL.md`
 
-Acknowledgement of oversight
+## Acknowledgement of oversight
 
 - I overlooked using the AAA structure in the tests. It wasn’t a technical limitation, but more of an oversight. I corrected it afterwards and will submit a PR if permitted. I'm also using it as a reminder to pay more attention to clarity and maintainability.
