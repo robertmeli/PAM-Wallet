@@ -1,0 +1,1437 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/PragmaticFlow/NBomber@assets/v5.0/assets/theme.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+
+    <title>NBomber</title>
+
+    <!-- Global View -->
+    <script type="text/x-template" id="global-view">
+
+        <div class="row">
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <load-test-info :test-info="testInfo"></load-test-info>
+            </div>
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <chart-latency-indicators :is-scenario-view="false" :scenario-stats="scenarioStats"></chart-latency-indicators>
+            </div>
+
+        </div>
+
+        <div class="mb-9 card">
+            <ul class="nav nav-line-bottom" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#scenario-stats-table" role="tab" aria-selected="true">Summary</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#scenario-thresholds" role="tab" aria-selected="true">Thresholds</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#nb-config" role="tab" aria-selected="true">NBomber Config</a>
+                </li>
+            </ul>
+            <!-- Tab content -->
+            <div class="tab-content p-4">
+                <div class="tab-pane fade show active" id="scenario-stats-table" role="tabpanel">
+
+                    <scenario-stats-table :is-ok="true" :scenario-stats="scenarioStats"></scenario-stats-table>
+
+                </div>
+                <div class="tab-pane fade" id="scenario-thresholds" role="tabpanel">
+
+                    <scenario-thresholds-table :thresholds="thresholds"></scenario-thresholds-table>
+
+                </div>
+                <div class="tab-pane fade" id="nb-config" role="tabpanel">
+
+                    <prism-json :jsonBody="nbConfig"></prism-json>
+
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- Cluster View -->
+    <script type="text/x-template" id="cluster-view">
+
+        <div class="row">
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <load-test-info :test-info="testInfo"></load-test-info>
+            </div>
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <node-info :node-info="nodeInfo"></node-info>
+            </div>
+
+        </div>
+
+        <div class="mb-9 card">
+            <ul class="nav nav-line-bottom" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#cluster-nodes" role="tab" aria-selected="true">Cluster Nodes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#nb-config" role="tab">NBomber Config</a>
+                </li>
+            </ul>
+            <!-- Tab content -->
+            <div class="tab-content p-4">
+
+                <div class="tab-pane fade show active" id="cluster-nodes" role="tabpanel">
+                    <cluster-nodes-table :nodes="clusterNodes"></cluster-nodes-table>
+                </div>
+
+                <div class="tab-pane fade" id="nb-config" role="tabpanel">
+                    <prism-json :jsonBody="nbConfig"></prism-json>
+                </div>
+
+            </div>
+        </div>
+    </script>
+
+    <!-- Scenario View -->
+    <script type="text/x-template" id="scenario-view">
+
+        <div class="row">
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <load-test-info :test-info="testInfo"></load-test-info>
+            </div>
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <chart-latency-indicators :is-scenario-view="true" :scenario-stats="scenarioStats"></chart-latency-indicators>
+            </div>
+
+        </div>
+
+        <div class="mb-9 card">
+            <ul class="nav nav-line-bottom" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#scenario-stats-table" role="tab" aria-selected="true">Summary</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#scenario-charts" role="tab" aria-selected="false">Charts</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#scenario-failures" role="tab" aria-selected="false">Failures</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#scenario-thresholds" role="tab" aria-selected="false">Thresholds</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#scenario-metrics" role="tab" aria-selected="false">Metrics</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="pill" href="#dotnet-process-metrics" role="tab" aria-selected="false">.NET Process Metrics</a>
+                </li>
+            </ul>
+
+            <!-- Tab content -->
+            <div class="tab-content p-4">
+                <div class="tab-pane fade show active" id="scenario-stats-table" role="tabpanel">
+
+                    <template v-if="scenarioStats[0].Ok.StatusCodes.length > 0 || scenarioStats[0].Fail.StatusCodes.length > 0">
+                        <scenario-status-code-table :scenario-stats="scenarioStats[0]"></scenario-status-code-table>
+                    </template>
+
+                    <scenario-stats-table :is-ok="true" :scenario-stats="scenarioStats"></scenario-stats-table>
+
+                </div>
+                <div class="tab-pane fade" id="scenario-charts" role="tabpanel">
+
+                    <scenario-charts-view :steps-stats-history="stepsStatsHistory"></scenario-charts-view>
+
+                </div>
+                <div class="tab-pane fade" id="scenario-metrics" role="tabpanel">
+
+                    <metrics-charts :metrics="metrics.filter(x => x.ScenarioName === scenarioStats[0].ScenarioName)"></metrics-charts>
+
+                </div>
+                <div class="tab-pane fade" id="dotnet-process-metrics" role="tabpanel">
+
+                    <metrics-charts :metrics="metrics.filter(x => x.ScenarioName === '')"></metrics-charts>
+
+                </div>
+                <div class="tab-pane fade" id="scenario-failures" role="tabpanel">
+
+                    <scenario-stats-table :is-ok="false" :scenario-stats="scenarioStats"></scenario-stats-table>
+
+                </div>
+                <div class="tab-pane fade" id="scenario-thresholds" role="tabpanel">
+
+                    <scenario-thresholds-table :thresholds="thresholds"></scenario-thresholds-table>
+
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- Scenario Charts View -->
+    <script type="text/x-template" id="scenario-charts-view">
+        <div class="card h-100 shadow-lg p-3 mb-5 bg-white rounded-1">
+            <div class="card-body">
+
+                <template v-if="stepsStatsHistory.length > 0">
+                    <div class="row">
+                        <div class="col-2">
+                            <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+
+                                <a v-for="(stData, index) in stepsStatsHistory" class="nav-link" :class="{ active: index === 0 }" data-bs-toggle="pill"
+                                   :href="'#st' + index"
+                                   @click="selectStep(stData[0])"
+                                   role="tab" aria-selected="true">
+                                    {{ stData[0].Step.StepName }}
+                                </a>
+
+                            </div>
+                        </div>
+                        <div class="col-10">
+                            <div class="tab-content">
+                                <div v-for="(stData, index) in stepsStatsHistory"
+                                     class="tab-pane fade" :class="{ active: index === 0, show: index === 0 }" :id="'st' + index" role="tabpanel">
+
+                                    <chart-scenario-throughput :step-time-line="stData"></chart-scenario-throughput>
+                                    <chart-scenario-latency :step-time-line="stData"></chart-scenario-latency>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <template v-else>
+                    <h5 class="text-muted text-uppercase fw-semi-bold">No Data</h5>
+                </template>
+
+            </div>
+        </div>
+    </script>
+
+    <!-- Hints View -->
+    <script type="text/x-template" id="hints-view">
+
+        <div class="row">
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <load-test-info :test-info="testInfo"></load-test-info>
+            </div>
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <chart-latency-indicators :is-scenario-view="false" :scenario-stats="scenarioStats"></chart-latency-indicators>
+            </div>
+
+        </div>
+
+        <div class="mb-9 card">
+            <ul class="nav nav-line-bottom" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#hints-table" role="tab" aria-selected="true">Hints</a>
+                </li>
+            </ul>
+            <!-- Tab content -->
+            <div class="tab-content p-4">
+                <div class="tab-pane fade show active" id="hints-table" role="tabpanel">
+
+                    <template v-if="hints.length > 0">
+                        <hints-table :hints="hints"></hints-table>
+                    </template>
+                    <template v-else>
+                        <h5 class="text-muted text-uppercase fw-semi-bold">No Data</h5>
+                    </template>
+
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- Plugins View -->
+    <script type="text/x-template" id="plugins-view">
+
+        <div class="row">
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <load-test-info :test-info="testInfo"></load-test-info>
+            </div>
+
+            <div class="col-xxl-6 col-12 mb-5">
+                <node-info :node-info="nodeInfo"></node-info>
+            </div>
+
+        </div>
+
+        <div class="mb-9 card">
+            <ul class="nav nav-line-bottom" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#plugins-data" role="tab" aria-selected="true">Plugins Data</a>
+                </li>
+            </ul>
+            <!-- Tab content -->
+            <div class="tab-content p-4">
+                <div class="tab-pane fade show active" id="plugins-data" role="tabpanel">
+
+                    <template v-if="plugins.length > 0">
+                        <template v-for="plugin in plugins">
+                            <template v-for="table in plugin">
+
+                                <plugin-table :data="table"></plugin-table>
+
+                            </template>
+                        </template>
+                    </template>
+                    <template v-else>
+                        <h5 class="text-muted text-uppercase fw-semi-bold">No Data</h5>
+                    </template>
+
+                </div>
+            </div>
+        </div>
+    </script>
+
+</head>
+<body id="app" class="bg-light">
+    <div id="db-wrapper">
+        <!-- Sidebar -->
+        <nav class="navbar-vertical navbar">
+            <div class="nav-scroller">
+
+                <!-- Brand logo -->
+                <a class="navbar-brand" href="https://nbomber.com/" target="_blank">
+                    <img src="https://raw.githubusercontent.com/PragmaticFlow/NBomber/assets/v5.0/assets/nbomber_logo.png" alt="NBomber" />
+                </a>
+
+                <!-- Navbar nav -->
+                <ul class="navbar-nav flex-column" id="sideNavbar">
+
+                    <li class="nav-item">
+                        <div class="navbar-heading">version {{ currentNodeInfo.NBomberVersion }}</div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: currentView === 'global-view' }"
+                           @click="loadView('global-view')" href="#">
+                            <i data-feather="home" class="nav-icon icon-xs me-2"></i> Global Info
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: currentView === 'cluster-view' }"
+                           @click="loadView('cluster-view')" href="#">
+                            <i data-feather="codepen" class="nav-icon icon-xs me-2"></i> Cluster Info
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link has-arrow" href="#!" data-bs-toggle="collapse" data-bs-target="#navScenarios"
+                           aria-expanded="true">
+                            <i data-feather="layers" class="nav-icon icon-xs me-2"></i> Scenarios
+                        </a>
+
+                        <div id="navScenarios" class="collapse hidden" data-bs-parent="#sideNavbar">
+                            <ul class="nav flex-column">
+                                <li v-for="(scn, index) in viewModel.FinalStats.ScenarioStats" class="nav-item">
+
+                                    <a class="nav-link "
+                                       :class="{ active: currentView === 'scenario-view' && currentScenarioName === scn.ScenarioName }"
+                                       @click="loadView('scenario-view', scn.ScenarioName)" href="#">{{ scn.ScenarioName }}</a>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: currentView === 'hints-view' }"
+                           @click="loadView('hints-view')" href="#">
+                            <i data-feather="book-open" class="nav-icon icon-xs me-2"></i> Hints
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: currentView === 'plugins-view' }"
+                           @click="loadView('plugins-view')" href="#">
+                            <i data-feather="hexagon" class="nav-icon icon-xs me-2"></i> Plugins
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
+
+        <!-- Page content -->
+        <div id="page-content">
+            <div class="header @@classList">
+
+                <div class="bg-info pt-10 pb-20"></div>
+
+                <div class="container-fluid mt-n22 px-6">
+
+                    <component :is="currentView" v-bind="currentProperties" :key="currentScenarioName"></component>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Libs JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-slimscroll@1.3.8/jquery.slimscroll.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.29.0/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.40.0/dist/apexcharts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mitt@3.0.1/dist/mitt.umd.min.js"></script>
+
+    <!-- Theme JS -->
+    <script src="https://cdn.jsdelivr.net/gh/PragmaticFlow/NBomber@assets/v5.0/assets/theme.js"></script>
+
+    <!-- App JS -->
+    <script>
+
+                const viewModel = {
+                    "FinalStats": {"ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":37989,"RPS":808.3,"Percent":83},"Latency":{"MinMs":1776.09,"MeanMs":7148.48,"MaxMs":15573.12,"Percent50":7135.23,"Percent75":8896.51,"Percent95":11812.86,"Percent99":13516.8,"StdDev":2660.26,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":37989}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":7986,"RPS":169.9,"Percent":17},"Latency":{"MinMs":9999.51,"MeanMs":11944.96,"MaxMs":16230.78,"Percent50":11198.46,"Percent75":13582.34,"Percent95":15917.06,"Percent99":16162.82,"StdDev":1982,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":7986}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":7986,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":37989,"RPS":808.3,"Percent":83},"Latency":{"MinMs":1776.09,"MeanMs":7148.48,"MaxMs":15573.12,"Percent50":7135.23,"Percent75":8896.51,"Percent95":11812.86,"Percent99":13516.8,"StdDev":2660.26,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":37989}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":7986,"RPS":169.9,"Percent":17},"Latency":{"MinMs":9999.51,"MeanMs":11944.96,"MaxMs":16230.78,"Percent50":11198.46,"Percent75":13582.34,"Percent95":15917.06,"Percent99":16162.82,"StdDev":1982,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":7986}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":7986,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Complete","AllRequestCount":45975,"AllOkCount":37989,"AllFailCount":7986,"AllBytes":0,"Duration":"00:00:47","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":35370,"RPS":803.9,"Percent":83},"Latency":{"MinMs":1823.04,"MeanMs":7288.46,"MaxMs":15477.15,"Percent50":7274.5,"Percent75":9076.74,"Percent95":11845.63,"Percent99":13672.45,"StdDev":2705.51,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":35370}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":7439,"RPS":169.1,"Percent":17},"Latency":{"MinMs":9999.25,"MeanMs":11870.37,"MaxMs":16179.39,"Percent50":11165.7,"Percent75":13508.61,"Percent95":15818.75,"Percent99":16162.82,"StdDev":1917.12,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":7439}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":7439,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":35370,"RPS":803.9,"Percent":83},"Latency":{"MinMs":1823.04,"MeanMs":7288.46,"MaxMs":15477.15,"Percent50":7274.5,"Percent75":9076.74,"Percent95":11845.63,"Percent99":13672.45,"StdDev":2705.51,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":35370}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":7439,"RPS":169.1,"Percent":17},"Latency":{"MinMs":9999.25,"MeanMs":11870.37,"MaxMs":16179.39,"Percent50":11165.7,"Percent75":13508.61,"Percent95":15818.75,"Percent99":16162.82,"StdDev":1917.12,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":7439}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":7439,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Complete","AllRequestCount":42809,"AllOkCount":35370,"AllFailCount":7439,"AllBytes":0,"Duration":"00:00:44","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":45217,"RPS":942,"Percent":95},"Latency":{"MinMs":0.2,"MeanMs":4399.95,"MaxMs":15538.67,"Percent50":4188.16,"Percent75":6430.72,"Percent95":9986.05,"Percent99":12320.77,"StdDev":3067.35,"LatencyCount":{"LessOrEq800":6228,"More800Less1200":1457,"MoreOrEq1200":37532}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":2565,"RPS":53.4,"Percent":5},"Latency":{"MinMs":10000.44,"MeanMs":12253.58,"MaxMs":16179.53,"Percent50":11755.52,"Percent75":14131.2,"Percent95":16015.36,"Percent99":16162.82,"StdDev":2092.88,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2565}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":2565,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":45217,"RPS":942,"Percent":95},"Latency":{"MinMs":0.2,"MeanMs":4399.95,"MaxMs":15538.67,"Percent50":4188.16,"Percent75":6430.72,"Percent95":9986.05,"Percent99":12320.77,"StdDev":3067.35,"LatencyCount":{"LessOrEq800":6228,"More800Less1200":1457,"MoreOrEq1200":37532}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":2565,"RPS":53.4,"Percent":5},"Latency":{"MinMs":10000.44,"MeanMs":12253.58,"MaxMs":16179.53,"Percent50":11755.52,"Percent75":14131.2,"Percent95":16015.36,"Percent99":16162.82,"StdDev":2092.88,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2565}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":2565,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Complete","AllRequestCount":47782,"AllOkCount":45217,"AllFailCount":2565,"AllBytes":0,"Duration":"00:00:48","SortIndex":2}],"Metrics":{"Counters":[],"Gauges":[{"ScenarioName":"","MetricName":"cpu:usage","UnitOfMeasure":"%","Value":19.88},{"ScenarioName":"","MetricName":"memory:working-set","UnitOfMeasure":"MB","Value":507.03},{"ScenarioName":"","MetricName":"gc:heap-size","UnitOfMeasure":"MB","Value":125.24},{"ScenarioName":"","MetricName":"gc:time-in-gc","UnitOfMeasure":"%","Value":39},{"ScenarioName":"","MetricName":"gc:loh-size","UnitOfMeasure":"B","Value":5959528},{"ScenarioName":"","MetricName":"threadpool:queue-length","UnitOfMeasure":"","Value":7161},{"ScenarioName":"","MetricName":"threadpool:thread-count","UnitOfMeasure":"","Value":37},{"ScenarioName":"","MetricName":"data:received","UnitOfMeasure":"B","Value":35119571},{"ScenarioName":"","MetricName":"data:sent","UnitOfMeasure":"B","Value":20988626},{"ScenarioName":"","MetricName":"dns:lookups-requested","UnitOfMeasure":"","Value":15306},{"ScenarioName":"","MetricName":"dns:lookups-duration","UnitOfMeasure":"ms","Value":3183.72}],"Duration":"00:01:00"},"Thresholds":[],"NodeInfo":{"MachineName":"DESKTOP-FPDD7MH","NodeType":{"Case":"SingleNode"},"CurrentOperation":"Complete","OS":"Microsoft Windows NT 10.0.26200.0","DotNetVersion":".NETCoreApp,Version=v10.0","Processor":"AMD64 Family 23 Model 104 Stepping 1, AuthenticAMD","CoresCount":16,"NBomberVersion":"6.0.0"},"TestInfo":{"SessionId":"2026-05-25_08.45.74_session_1480d2f3","TestSuite":"WalletPerformance","TestName":"PAM-Wallet Benchmark","ClusterId":"","Created":"2026-05-25T08:45:40.6338891Z"},"AllRequestCount":136566,"AllOkCount":118576,"AllFailCount":17990,"AllBytes":0,"Duration":"00:00:48","PluginsData":[],"ReportFiles":[]},
+                    "TimeLineHistory": [{"Timestamp":"00:00:05","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":3109,"RPS":621.8,"Percent":100},"Latency":{"MinMs":2600.95,"MeanMs":4130.07,"MaxMs":8506.34,"Percent50":3829.76,"Percent75":4743.17,"Percent95":6696.96,"Percent99":7929.86,"StdDev":1257.01,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3109}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":3109,"RPS":621.8,"Percent":100},"Latency":{"MinMs":2600.95,"MeanMs":4130.07,"MaxMs":8506.34,"Percent50":3829.76,"Percent75":4743.17,"Percent95":6696.96,"Percent99":7929.86,"StdDev":1257.01,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3109}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3109,"AllOkCount":3109,"AllFailCount":0,"AllBytes":0,"Duration":"00:00:05","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":2708,"RPS":541.6,"Percent":100},"Latency":{"MinMs":2592.27,"MeanMs":4214.8,"MaxMs":8894.2,"Percent50":3944.45,"Percent75":4820.99,"Percent95":7311.36,"Percent99":8224.77,"StdDev":1374.95,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2708}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2708,"RPS":541.6,"Percent":100},"Latency":{"MinMs":2592.27,"MeanMs":4214.8,"MaxMs":8894.2,"Percent50":3944.45,"Percent75":4820.99,"Percent95":7311.36,"Percent99":8224.77,"StdDev":1374.95,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2708}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2708,"AllOkCount":2708,"AllFailCount":0,"AllBytes":0,"Duration":"00:00:05","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":4320,"RPS":864,"Percent":100},"Latency":{"MinMs":0.36,"MeanMs":1732.43,"MaxMs":8373.22,"Percent50":1294.34,"Percent75":2549.76,"Percent95":5283.84,"Percent99":7458.82,"StdDev":1701.51,"LatencyCount":{"LessOrEq800":1599,"More800Less1200":439,"MoreOrEq1200":2282}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":4320,"RPS":864,"Percent":100},"Latency":{"MinMs":0.36,"MeanMs":1732.43,"MaxMs":8373.22,"Percent50":1294.34,"Percent75":2549.76,"Percent95":5283.84,"Percent99":7458.82,"StdDev":1701.51,"LatencyCount":{"LessOrEq800":1599,"More800Less1200":439,"MoreOrEq1200":2282}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":4320,"AllOkCount":4320,"AllFailCount":0,"AllBytes":0,"Duration":"00:00:05","SortIndex":2}]},{"Timestamp":"00:00:10","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":3917,"RPS":783.4,"Percent":94},"Latency":{"MinMs":3117.73,"MeanMs":5596.51,"MaxMs":10190.76,"Percent50":5140.48,"Percent75":6823.94,"Percent95":8896.51,"Percent99":9584.64,"StdDev":1674.06,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3917}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":257,"RPS":51.4,"Percent":6},"Latency":{"MinMs":10007.88,"MeanMs":10070.13,"MaxMs":10239.44,"Percent50":10067.97,"Percent75":10108.93,"Percent95":10182.66,"Percent99":10199.04,"StdDev":54.03,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":257}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":257,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":3917,"RPS":783.4,"Percent":94},"Latency":{"MinMs":3117.73,"MeanMs":5596.51,"MaxMs":10190.76,"Percent50":5140.48,"Percent75":6823.94,"Percent95":8896.51,"Percent99":9584.64,"StdDev":1674.06,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3917}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":257,"RPS":51.4,"Percent":6},"Latency":{"MinMs":10007.88,"MeanMs":10070.13,"MaxMs":10239.44,"Percent50":10067.97,"Percent75":10108.93,"Percent95":10182.66,"Percent99":10199.04,"StdDev":54.03,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":257}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":257,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":4174,"AllOkCount":3917,"AllFailCount":257,"AllBytes":0,"Duration":"00:00:10","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":3235,"RPS":647,"Percent":91},"Latency":{"MinMs":3123.02,"MeanMs":5651.65,"MaxMs":10120.31,"Percent50":5177.34,"Percent75":6959.1,"Percent95":9027.58,"Percent99":9543.68,"StdDev":1755.89,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3235}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":324,"RPS":64.8,"Percent":9},"Latency":{"MinMs":9999.66,"MeanMs":10076.04,"MaxMs":10363.47,"Percent50":10067.97,"Percent75":10125.31,"Percent95":10190.85,"Percent99":10215.42,"StdDev":58.5,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":324}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":324,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":3235,"RPS":647,"Percent":91},"Latency":{"MinMs":3123.02,"MeanMs":5651.65,"MaxMs":10120.31,"Percent50":5177.34,"Percent75":6959.1,"Percent95":9027.58,"Percent99":9543.68,"StdDev":1755.89,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3235}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":324,"RPS":64.8,"Percent":9},"Latency":{"MinMs":9999.66,"MeanMs":10076.04,"MaxMs":10363.47,"Percent50":10067.97,"Percent75":10125.31,"Percent95":10190.85,"Percent99":10215.42,"StdDev":58.5,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":324}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":324,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3559,"AllOkCount":3235,"AllFailCount":324,"AllBytes":0,"Duration":"00:00:10","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":4448,"RPS":889.6,"Percent":99},"Latency":{"MinMs":2.17,"MeanMs":3103.97,"MaxMs":10115.9,"Percent50":2805.76,"Percent75":4296.7,"Percent95":7147.52,"Percent99":8830.98,"StdDev":2031.55,"LatencyCount":{"LessOrEq800":384,"More800Less1200":353,"MoreOrEq1200":3711}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":66,"RPS":13.2,"Percent":1},"Latency":{"MinMs":10009.38,"MeanMs":10081.4,"MaxMs":10258.2,"Percent50":10084.35,"Percent75":10125.31,"Percent95":10166.27,"Percent99":10199.04,"StdDev":54.11,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":66}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":66,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":4448,"RPS":889.6,"Percent":99},"Latency":{"MinMs":2.17,"MeanMs":3103.97,"MaxMs":10115.9,"Percent50":2805.76,"Percent75":4296.7,"Percent95":7147.52,"Percent99":8830.98,"StdDev":2031.55,"LatencyCount":{"LessOrEq800":384,"More800Less1200":353,"MoreOrEq1200":3711}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":66,"RPS":13.2,"Percent":1},"Latency":{"MinMs":10009.38,"MeanMs":10081.4,"MaxMs":10258.2,"Percent50":10084.35,"Percent75":10125.31,"Percent95":10166.27,"Percent99":10199.04,"StdDev":54.11,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":66}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":66,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":4514,"AllOkCount":4448,"AllFailCount":66,"AllBytes":0,"Duration":"00:00:10","SortIndex":2}]},{"Timestamp":"00:00:15","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":3400,"RPS":680,"Percent":87},"Latency":{"MinMs":4684.8,"MeanMs":6842.13,"MaxMs":10340.03,"Percent50":6565.89,"Percent75":7741.44,"Percent95":9502.72,"Percent99":9936.9,"StdDev":1351.11,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3400}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":518,"RPS":103.6,"Percent":13},"Latency":{"MinMs":10000.79,"MeanMs":10111.12,"MaxMs":10448.83,"Percent50":10092.54,"Percent75":10182.66,"Percent95":10280.96,"Percent99":10330.11,"StdDev":89.18,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":518}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":518,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":3400,"RPS":680,"Percent":87},"Latency":{"MinMs":4684.8,"MeanMs":6842.13,"MaxMs":10340.03,"Percent50":6565.89,"Percent75":7741.44,"Percent95":9502.72,"Percent99":9936.9,"StdDev":1351.11,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3400}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":518,"RPS":103.6,"Percent":13},"Latency":{"MinMs":10000.79,"MeanMs":10111.12,"MaxMs":10448.83,"Percent50":10092.54,"Percent75":10182.66,"Percent95":10280.96,"Percent99":10330.11,"StdDev":89.18,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":518}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":518,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3918,"AllOkCount":3400,"AllFailCount":518,"AllBytes":0,"Duration":"00:00:15","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":3143,"RPS":628.6,"Percent":89},"Latency":{"MinMs":4690.04,"MeanMs":6785.88,"MaxMs":10241.14,"Percent50":6492.16,"Percent75":7753.73,"Percent95":9437.18,"Percent99":9871.36,"StdDev":1339.84,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3143}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":370,"RPS":74,"Percent":11},"Latency":{"MinMs":10003.78,"MeanMs":10095.59,"MaxMs":10374.48,"Percent50":10076.16,"Percent75":10149.89,"Percent95":10280.96,"Percent99":10305.54,"StdDev":91.16,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":370}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":370,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":3143,"RPS":628.6,"Percent":89},"Latency":{"MinMs":4690.04,"MeanMs":6785.88,"MaxMs":10241.14,"Percent50":6492.16,"Percent75":7753.73,"Percent95":9437.18,"Percent99":9871.36,"StdDev":1339.84,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3143}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":370,"RPS":74,"Percent":11},"Latency":{"MinMs":10003.78,"MeanMs":10095.59,"MaxMs":10374.48,"Percent50":10076.16,"Percent75":10149.89,"Percent95":10280.96,"Percent99":10305.54,"StdDev":91.16,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":370}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":370,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3513,"AllOkCount":3143,"AllFailCount":370,"AllBytes":0,"Duration":"00:00:15","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":4070,"RPS":814,"Percent":98},"Latency":{"MinMs":2277.28,"MeanMs":4827.4,"MaxMs":10001.3,"Percent50":4493.31,"Percent75":6017.02,"Percent95":8306.69,"Percent99":9707.52,"StdDev":1811.94,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":4070}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":79,"RPS":15.8,"Percent":2},"Latency":{"MinMs":10004.34,"MeanMs":10069.14,"MaxMs":10286.72,"Percent50":10076.16,"Percent75":10100.74,"Percent95":10215.42,"Percent99":10248.19,"StdDev":58.68,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":79}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":79,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":4070,"RPS":814,"Percent":98},"Latency":{"MinMs":2277.28,"MeanMs":4827.4,"MaxMs":10001.3,"Percent50":4493.31,"Percent75":6017.02,"Percent95":8306.69,"Percent99":9707.52,"StdDev":1811.94,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":4070}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":79,"RPS":15.8,"Percent":2},"Latency":{"MinMs":10004.34,"MeanMs":10069.14,"MaxMs":10286.72,"Percent50":10076.16,"Percent75":10100.74,"Percent95":10215.42,"Percent99":10248.19,"StdDev":58.68,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":79}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":79,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":4149,"AllOkCount":4070,"AllFailCount":79,"AllBytes":0,"Duration":"00:00:15","SortIndex":2}]},{"Timestamp":"00:00:20","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":5418,"RPS":1083.6,"Percent":81},"Latency":{"MinMs":6240.96,"MeanMs":8663.08,"MaxMs":12737.48,"Percent50":8454.14,"Percent75":9576.45,"Percent95":11067.39,"Percent99":12206.08,"StdDev":1310.79,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5418}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1245,"RPS":249,"Percent":19},"Latency":{"MinMs":10000.46,"MeanMs":11025.41,"MaxMs":12927.71,"Percent50":10878.98,"Percent75":11673.6,"Percent95":12369.92,"Percent99":12853.25,"StdDev":879.9,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1245}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1245,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":5418,"RPS":1083.6,"Percent":81},"Latency":{"MinMs":6240.96,"MeanMs":8663.08,"MaxMs":12737.48,"Percent50":8454.14,"Percent75":9576.45,"Percent95":11067.39,"Percent99":12206.08,"StdDev":1310.79,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5418}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1245,"RPS":249,"Percent":19},"Latency":{"MinMs":10000.46,"MeanMs":11025.41,"MaxMs":12927.71,"Percent50":10878.98,"Percent75":11673.6,"Percent95":12369.92,"Percent99":12853.25,"StdDev":879.9,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1245}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1245,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":6663,"AllOkCount":5418,"AllFailCount":1245,"AllBytes":0,"Duration":"00:00:20","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":5309,"RPS":1061.8,"Percent":81},"Latency":{"MinMs":6240.28,"MeanMs":8718.56,"MaxMs":12744.34,"Percent50":8486.91,"Percent75":9625.6,"Percent95":11157.5,"Percent99":12206.08,"StdDev":1349.32,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5309}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1213,"RPS":242.6,"Percent":19},"Latency":{"MinMs":9999.76,"MeanMs":11069.82,"MaxMs":12925.33,"Percent50":11141.12,"Percent75":11657.22,"Percent95":12369.92,"Percent99":12804.1,"StdDev":873.51,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1213}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1213,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":5309,"RPS":1061.8,"Percent":81},"Latency":{"MinMs":6240.28,"MeanMs":8718.56,"MaxMs":12744.34,"Percent50":8486.91,"Percent75":9625.6,"Percent95":11157.5,"Percent99":12206.08,"StdDev":1349.32,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5309}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1213,"RPS":242.6,"Percent":19},"Latency":{"MinMs":9999.76,"MeanMs":11069.82,"MaxMs":12925.33,"Percent50":11141.12,"Percent75":11657.22,"Percent95":12369.92,"Percent99":12804.1,"StdDev":873.51,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1213}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1213,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":6522,"AllOkCount":5309,"AllFailCount":1213,"AllBytes":0,"Duration":"00:00:20","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":5591,"RPS":1118.2,"Percent":93},"Latency":{"MinMs":4027.27,"MeanMs":6762.39,"MaxMs":12732.3,"Percent50":6361.09,"Percent75":7839.74,"Percent95":10379.26,"Percent99":11337.73,"StdDev":1809.98,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5591}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":434,"RPS":86.8,"Percent":7},"Latency":{"MinMs":10003.28,"MeanMs":11078.73,"MaxMs":12916.02,"Percent50":10854.4,"Percent75":11673.6,"Percent95":12722.18,"Percent99":12902.4,"StdDev":864.72,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":434}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":434,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":5591,"RPS":1118.2,"Percent":93},"Latency":{"MinMs":4027.27,"MeanMs":6762.39,"MaxMs":12732.3,"Percent50":6361.09,"Percent75":7839.74,"Percent95":10379.26,"Percent99":11337.73,"StdDev":1809.98,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5591}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":434,"RPS":86.8,"Percent":7},"Latency":{"MinMs":10003.28,"MeanMs":11078.73,"MaxMs":12916.02,"Percent50":10854.4,"Percent75":11673.6,"Percent95":12722.18,"Percent99":12902.4,"StdDev":864.72,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":434}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":434,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":6025,"AllOkCount":5591,"AllFailCount":434,"AllBytes":0,"Duration":"00:00:20","SortIndex":2}]},{"Timestamp":"00:00:25","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":5099,"RPS":1019.8,"Percent":85},"Latency":{"MinMs":2421.35,"MeanMs":8654.18,"MaxMs":14822.85,"Percent50":8413.18,"Percent75":10469.38,"Percent95":12918.78,"Percent99":13918.21,"StdDev":2540.58,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5099}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":911,"RPS":182.2,"Percent":15},"Latency":{"MinMs":10002.14,"MeanMs":13078.82,"MaxMs":14979.33,"Percent50":13737.98,"Percent75":14262.27,"Percent95":14573.57,"Percent99":14761.98,"StdDev":1648.43,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":911}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":911,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":5099,"RPS":1019.8,"Percent":85},"Latency":{"MinMs":2421.35,"MeanMs":8654.18,"MaxMs":14822.85,"Percent50":8413.18,"Percent75":10469.38,"Percent95":12918.78,"Percent99":13918.21,"StdDev":2540.58,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":5099}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":911,"RPS":182.2,"Percent":15},"Latency":{"MinMs":10002.14,"MeanMs":13078.82,"MaxMs":14979.33,"Percent50":13737.98,"Percent75":14262.27,"Percent95":14573.57,"Percent99":14761.98,"StdDev":1648.43,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":911}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":911,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":6010,"AllOkCount":5099,"AllFailCount":911,"AllBytes":0,"Duration":"00:00:25","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":4342,"RPS":868.4,"Percent":82},"Latency":{"MinMs":2382.56,"MeanMs":8922.72,"MaxMs":14670.04,"Percent50":8617.98,"Percent75":10854.4,"Percent95":13041.66,"Percent99":14155.78,"StdDev":2478.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":4342}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":944,"RPS":188.8,"Percent":18},"Latency":{"MinMs":9999.25,"MeanMs":12846.76,"MaxMs":14847.24,"Percent50":13459.46,"Percent75":14196.74,"Percent95":14540.8,"Percent99":14704.64,"StdDev":1710.2,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":944}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":944,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":4342,"RPS":868.4,"Percent":82},"Latency":{"MinMs":2382.56,"MeanMs":8922.72,"MaxMs":14670.04,"Percent50":8617.98,"Percent75":10854.4,"Percent95":13041.66,"Percent99":14155.78,"StdDev":2478.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":4342}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":944,"RPS":188.8,"Percent":18},"Latency":{"MinMs":9999.25,"MeanMs":12846.76,"MaxMs":14847.24,"Percent50":13459.46,"Percent75":14196.74,"Percent95":14540.8,"Percent99":14704.64,"StdDev":1710.2,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":944}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":944,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":5286,"AllOkCount":4342,"AllFailCount":944,"AllBytes":0,"Duration":"00:00:25","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":4458,"RPS":891.6,"Percent":94},"Latency":{"MinMs":0.2,"MeanMs":5596.09,"MaxMs":14897.71,"Percent50":5242.88,"Percent75":8331.26,"Percent95":12009.47,"Percent99":13295.62,"StdDev":3607.78,"LatencyCount":{"LessOrEq800":686,"More800Less1200":73,"MoreOrEq1200":3699}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":299,"RPS":59.8,"Percent":6},"Latency":{"MinMs":10002.21,"MeanMs":12427.69,"MaxMs":14964.05,"Percent50":13344.77,"Percent75":14147.58,"Percent95":14499.84,"Percent99":14614.53,"StdDev":1860.07,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":299}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":299,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":4458,"RPS":891.6,"Percent":94},"Latency":{"MinMs":0.2,"MeanMs":5596.09,"MaxMs":14897.71,"Percent50":5242.88,"Percent75":8331.26,"Percent95":12009.47,"Percent99":13295.62,"StdDev":3607.78,"LatencyCount":{"LessOrEq800":686,"More800Less1200":73,"MoreOrEq1200":3699}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":299,"RPS":59.8,"Percent":6},"Latency":{"MinMs":10002.21,"MeanMs":12427.69,"MaxMs":14964.05,"Percent50":13344.77,"Percent75":14147.58,"Percent95":14499.84,"Percent99":14614.53,"StdDev":1860.07,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":299}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":299,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":4757,"AllOkCount":4458,"AllFailCount":299,"AllBytes":0,"Duration":"00:00:25","SortIndex":2}]},{"Timestamp":"00:00:30","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":2467,"RPS":493.4,"Percent":86},"Latency":{"MinMs":1776.09,"MeanMs":3715.13,"MaxMs":10988.26,"Percent50":2977.79,"Percent75":4050.94,"Percent95":9248.77,"Percent99":10526.72,"StdDev":2056.92,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2467}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":394,"RPS":78.8,"Percent":14},"Latency":{"MinMs":9999.97,"MeanMs":10632.25,"MaxMs":13314.29,"Percent50":10149.89,"Percent75":11526.14,"Percent95":12058.62,"Percent99":12337.15,"StdDev":812.69,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":394}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":394,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2467,"RPS":493.4,"Percent":86},"Latency":{"MinMs":1776.09,"MeanMs":3715.13,"MaxMs":10988.26,"Percent50":2977.79,"Percent75":4050.94,"Percent95":9248.77,"Percent99":10526.72,"StdDev":2056.92,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2467}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":394,"RPS":78.8,"Percent":14},"Latency":{"MinMs":9999.97,"MeanMs":10632.25,"MaxMs":13314.29,"Percent50":10149.89,"Percent75":11526.14,"Percent95":12058.62,"Percent99":12337.15,"StdDev":812.69,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":394}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":394,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2861,"AllOkCount":2467,"AllFailCount":394,"AllBytes":0,"Duration":"00:00:30","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":2547,"RPS":509.4,"Percent":87},"Latency":{"MinMs":1823.04,"MeanMs":3812.53,"MaxMs":10853.34,"Percent50":2942.98,"Percent75":3936.26,"Percent95":9388.03,"Percent99":10182.66,"StdDev":2031.41,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2547}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":383,"RPS":76.6,"Percent":13},"Latency":{"MinMs":10000.39,"MeanMs":10403.6,"MaxMs":12728.32,"Percent50":10125.31,"Percent75":10330.11,"Percent95":12304.38,"Percent99":12705.79,"StdDev":703.83,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":383}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":383,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2547,"RPS":509.4,"Percent":87},"Latency":{"MinMs":1823.04,"MeanMs":3812.53,"MaxMs":10853.34,"Percent50":2942.98,"Percent75":3936.26,"Percent95":9388.03,"Percent99":10182.66,"StdDev":2031.41,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2547}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":383,"RPS":76.6,"Percent":13},"Latency":{"MinMs":10000.39,"MeanMs":10403.6,"MaxMs":12728.32,"Percent50":10125.31,"Percent75":10330.11,"Percent95":12304.38,"Percent99":12705.79,"StdDev":703.83,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":383}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":383,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2930,"AllOkCount":2547,"AllFailCount":383,"AllBytes":0,"Duration":"00:00:30","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":4317,"RPS":863.4,"Percent":98},"Latency":{"MinMs":0.46,"MeanMs":1012.66,"MaxMs":11438.16,"Percent50":340.74,"Percent75":1355.78,"Percent95":3807.23,"Percent99":9150.46,"StdDev":1576.31,"LatencyCount":{"LessOrEq800":2755,"More800Less1200":332,"MoreOrEq1200":1230}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":92,"RPS":18.4,"Percent":2},"Latency":{"MinMs":10000.88,"MeanMs":10878.05,"MaxMs":12708.56,"Percent50":10952.7,"Percent75":11280.38,"Percent95":12337.15,"Percent99":12443.65,"StdDev":619.58,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":92}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":92,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":4317,"RPS":863.4,"Percent":98},"Latency":{"MinMs":0.46,"MeanMs":1012.66,"MaxMs":11438.16,"Percent50":340.74,"Percent75":1355.78,"Percent95":3807.23,"Percent99":9150.46,"StdDev":1576.31,"LatencyCount":{"LessOrEq800":2755,"More800Less1200":332,"MoreOrEq1200":1230}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":92,"RPS":18.4,"Percent":2},"Latency":{"MinMs":10000.88,"MeanMs":10878.05,"MaxMs":12708.56,"Percent50":10952.7,"Percent75":11280.38,"Percent95":12337.15,"Percent99":12443.65,"StdDev":619.58,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":92}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":92,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":4409,"AllOkCount":4317,"AllFailCount":92,"AllBytes":0,"Duration":"00:00:30","SortIndex":2}]},{"Timestamp":"00:00:35","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":2645,"RPS":529,"Percent":97},"Latency":{"MinMs":3006.4,"MeanMs":4945.81,"MaxMs":11389.79,"Percent50":4534.27,"Percent75":6094.85,"Percent95":7106.56,"Percent99":9150.46,"StdDev":1358.56,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2645}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":87,"RPS":17.4,"Percent":3},"Latency":{"MinMs":10006.98,"MeanMs":10677.73,"MaxMs":11519.5,"Percent50":10108.93,"Percent75":11378.69,"Percent95":11493.38,"Percent99":11526.14,"StdDev":671.09,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":87}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":87,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2645,"RPS":529,"Percent":97},"Latency":{"MinMs":3006.4,"MeanMs":4945.81,"MaxMs":11389.79,"Percent50":4534.27,"Percent75":6094.85,"Percent95":7106.56,"Percent99":9150.46,"StdDev":1358.56,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2645}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":87,"RPS":17.4,"Percent":3},"Latency":{"MinMs":10006.98,"MeanMs":10677.73,"MaxMs":11519.5,"Percent50":10108.93,"Percent75":11378.69,"Percent95":11493.38,"Percent99":11526.14,"StdDev":671.09,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":87}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":87,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2732,"AllOkCount":2645,"AllFailCount":87,"AllBytes":0,"Duration":"00:00:35","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":2467,"RPS":493.4,"Percent":97},"Latency":{"MinMs":3036.64,"MeanMs":5170.22,"MaxMs":11136.41,"Percent50":4808.7,"Percent75":6213.63,"Percent95":7761.92,"Percent99":8978.43,"StdDev":1414.66,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2467}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":65,"RPS":13,"Percent":3},"Latency":{"MinMs":10004.4,"MeanMs":10546.11,"MaxMs":11530.5,"Percent50":10108.93,"Percent75":11337.73,"Percent95":11419.65,"Percent99":11493.38,"StdDev":620.09,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":65}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":65,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2467,"RPS":493.4,"Percent":97},"Latency":{"MinMs":3036.64,"MeanMs":5170.22,"MaxMs":11136.41,"Percent50":4808.7,"Percent75":6213.63,"Percent95":7761.92,"Percent99":8978.43,"StdDev":1414.66,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2467}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":65,"RPS":13,"Percent":3},"Latency":{"MinMs":10004.4,"MeanMs":10546.11,"MaxMs":11530.5,"Percent50":10108.93,"Percent75":11337.73,"Percent95":11419.65,"Percent99":11493.38,"StdDev":620.09,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":65}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":65,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2532,"AllOkCount":2467,"AllFailCount":65,"AllBytes":0,"Duration":"00:00:35","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":2648,"RPS":529.6,"Percent":99},"Latency":{"MinMs":0.42,"MeanMs":2434.13,"MaxMs":10633.92,"Percent50":1832.96,"Percent75":3473.41,"Percent95":6373.38,"Percent99":8261.63,"StdDev":1962.91,"LatencyCount":{"LessOrEq800":661,"More800Less1200":21,"MoreOrEq1200":1966}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":26,"RPS":5.2,"Percent":1},"Latency":{"MinMs":10000.9,"MeanMs":10110.36,"MaxMs":10963.69,"Percent50":10035.2,"Percent75":10051.58,"Percent95":10969.09,"Percent99":10969.09,"StdDev":248.62,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":26}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":26,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2648,"RPS":529.6,"Percent":99},"Latency":{"MinMs":0.42,"MeanMs":2434.13,"MaxMs":10633.92,"Percent50":1832.96,"Percent75":3473.41,"Percent95":6373.38,"Percent99":8261.63,"StdDev":1962.91,"LatencyCount":{"LessOrEq800":661,"More800Less1200":21,"MoreOrEq1200":1966}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":26,"RPS":5.2,"Percent":1},"Latency":{"MinMs":10000.9,"MeanMs":10110.36,"MaxMs":10963.69,"Percent50":10035.2,"Percent75":10051.58,"Percent95":10969.09,"Percent99":10969.09,"StdDev":248.62,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":26}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":26,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2674,"AllOkCount":2648,"AllFailCount":26,"AllBytes":0,"Duration":"00:00:35","SortIndex":2}]},{"Timestamp":"00:00:40","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":2400,"RPS":480,"Percent":91},"Latency":{"MinMs":4500.11,"MeanMs":6884.49,"MaxMs":10887.86,"Percent50":6340.61,"Percent75":7999.49,"Percent95":9502.72,"Percent99":10403.84,"StdDev":1532.82,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2400}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":250,"RPS":50,"Percent":9},"Latency":{"MinMs":10002.69,"MeanMs":10578.24,"MaxMs":11220.47,"Percent50":10559.49,"Percent75":10903.55,"Percent95":11124.74,"Percent99":11206.66,"StdDev":400.02,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":250}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":250,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2400,"RPS":480,"Percent":91},"Latency":{"MinMs":4500.11,"MeanMs":6884.49,"MaxMs":10887.86,"Percent50":6340.61,"Percent75":7999.49,"Percent95":9502.72,"Percent99":10403.84,"StdDev":1532.82,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2400}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":250,"RPS":50,"Percent":9},"Latency":{"MinMs":10002.69,"MeanMs":10578.24,"MaxMs":11220.47,"Percent50":10559.49,"Percent75":10903.55,"Percent95":11124.74,"Percent99":11206.66,"StdDev":400.02,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":250}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":250,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2650,"AllOkCount":2400,"AllFailCount":250,"AllBytes":0,"Duration":"00:00:40","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":2314,"RPS":462.8,"Percent":87},"Latency":{"MinMs":4502.12,"MeanMs":6788.47,"MaxMs":10887.65,"Percent50":6344.7,"Percent75":7991.3,"Percent95":9338.88,"Percent99":10428.42,"StdDev":1523.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2314}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":348,"RPS":69.6,"Percent":13},"Latency":{"MinMs":10001.02,"MeanMs":10623.21,"MaxMs":11232.9,"Percent50":10731.52,"Percent75":10903.55,"Percent95":11116.54,"Percent99":11190.27,"StdDev":374.25,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":348}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":348,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2314,"RPS":462.8,"Percent":87},"Latency":{"MinMs":4502.12,"MeanMs":6788.47,"MaxMs":10887.65,"Percent50":6344.7,"Percent75":7991.3,"Percent95":9338.88,"Percent99":10428.42,"StdDev":1523.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2314}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":348,"RPS":69.6,"Percent":13},"Latency":{"MinMs":10001.02,"MeanMs":10623.21,"MaxMs":11232.9,"Percent50":10731.52,"Percent75":10903.55,"Percent95":11116.54,"Percent99":11190.27,"StdDev":374.25,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":348}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":348,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2662,"AllOkCount":2314,"AllFailCount":348,"AllBytes":0,"Duration":"00:00:40","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":3459,"RPS":691.8,"Percent":97},"Latency":{"MinMs":248.9,"MeanMs":3230.34,"MaxMs":10728.44,"Percent50":2830.34,"Percent75":4608,"Percent95":6492.16,"Percent99":9609.22,"StdDev":1970.85,"LatencyCount":{"LessOrEq800":143,"More800Less1200":239,"MoreOrEq1200":3077}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":123,"RPS":24.6,"Percent":3},"Latency":{"MinMs":10000.55,"MeanMs":10565.19,"MaxMs":11184.29,"Percent50":10534.91,"Percent75":10870.78,"Percent95":11141.12,"Percent99":11182.08,"StdDev":367.79,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":123}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":123,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":3459,"RPS":691.8,"Percent":97},"Latency":{"MinMs":248.9,"MeanMs":3230.34,"MaxMs":10728.44,"Percent50":2830.34,"Percent75":4608,"Percent95":6492.16,"Percent99":9609.22,"StdDev":1970.85,"LatencyCount":{"LessOrEq800":143,"More800Less1200":239,"MoreOrEq1200":3077}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":123,"RPS":24.6,"Percent":3},"Latency":{"MinMs":10000.55,"MeanMs":10565.19,"MaxMs":11184.29,"Percent50":10534.91,"Percent75":10870.78,"Percent95":11141.12,"Percent99":11182.08,"StdDev":367.79,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":123}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":123,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3582,"AllOkCount":3459,"AllFailCount":123,"AllBytes":0,"Duration":"00:00:40","SortIndex":2}]},{"Timestamp":"00:00:45","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":2698,"RPS":539.6,"Percent":87},"Latency":{"MinMs":4460.33,"MeanMs":6676.23,"MaxMs":10552.7,"Percent50":6332.42,"Percent75":7692.29,"Percent95":9527.3,"Percent99":10051.58,"StdDev":1517.16,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2698}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":405,"RPS":81,"Percent":13},"Latency":{"MinMs":10001.62,"MeanMs":10208.22,"MaxMs":10680.03,"Percent50":10141.7,"Percent75":10371.07,"Percent95":10477.57,"Percent99":10551.3,"StdDev":166.18,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":405}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":405,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2698,"RPS":539.6,"Percent":87},"Latency":{"MinMs":4460.33,"MeanMs":6676.23,"MaxMs":10552.7,"Percent50":6332.42,"Percent75":7692.29,"Percent95":9527.3,"Percent99":10051.58,"StdDev":1517.16,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2698}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":405,"RPS":81,"Percent":13},"Latency":{"MinMs":10001.62,"MeanMs":10208.22,"MaxMs":10680.03,"Percent50":10141.7,"Percent75":10371.07,"Percent95":10477.57,"Percent99":10551.3,"StdDev":166.18,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":405}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":405,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3103,"AllOkCount":2698,"AllFailCount":405,"AllBytes":0,"Duration":"00:00:45","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":2326,"RPS":465.2,"Percent":89},"Latency":{"MinMs":4398.45,"MeanMs":6719.18,"MaxMs":10302.81,"Percent50":6250.5,"Percent75":8286.21,"Percent95":9576.45,"Percent99":9887.74,"StdDev":1621.24,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2326}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":287,"RPS":57.4,"Percent":11},"Latency":{"MinMs":10001.26,"MeanMs":10250.15,"MaxMs":10677.36,"Percent50":10297.34,"Percent75":10395.65,"Percent95":10592.26,"Percent99":10592.26,"StdDev":179.81,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":287}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":287,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2326,"RPS":465.2,"Percent":89},"Latency":{"MinMs":4398.45,"MeanMs":6719.18,"MaxMs":10302.81,"Percent50":6250.5,"Percent75":8286.21,"Percent95":9576.45,"Percent99":9887.74,"StdDev":1621.24,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2326}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":287,"RPS":57.4,"Percent":11},"Latency":{"MinMs":10001.26,"MeanMs":10250.15,"MaxMs":10677.36,"Percent50":10297.34,"Percent75":10395.65,"Percent95":10592.26,"Percent99":10592.26,"StdDev":179.81,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":287}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":287,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2613,"AllOkCount":2326,"AllFailCount":287,"AllBytes":0,"Duration":"00:00:45","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":3871,"RPS":774.2,"Percent":97},"Latency":{"MinMs":1546.06,"MeanMs":3927.22,"MaxMs":10334.94,"Percent50":3573.76,"Percent75":5230.59,"Percent95":7331.84,"Percent99":8953.86,"StdDev":1823.2,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3871}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":121,"RPS":24.2,"Percent":3},"Latency":{"MinMs":10000.44,"MeanMs":10128.8,"MaxMs":10589.78,"Percent50":10108.93,"Percent75":10133.5,"Percent95":10412.03,"Percent99":10510.34,"StdDev":125.47,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":121}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":121,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":3871,"RPS":774.2,"Percent":97},"Latency":{"MinMs":1546.06,"MeanMs":3927.22,"MaxMs":10334.94,"Percent50":3573.76,"Percent75":5230.59,"Percent95":7331.84,"Percent99":8953.86,"StdDev":1823.2,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":3871}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":121,"RPS":24.2,"Percent":3},"Latency":{"MinMs":10000.44,"MeanMs":10128.8,"MaxMs":10589.78,"Percent50":10108.93,"Percent75":10133.5,"Percent95":10412.03,"Percent99":10510.34,"StdDev":125.47,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":121}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":121,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3992,"AllOkCount":3871,"AllFailCount":121,"AllBytes":0,"Duration":"00:00:45","SortIndex":2}]},{"Timestamp":"00:00:50","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":2184,"RPS":436.8,"Percent":72},"Latency":{"MinMs":5478.78,"MeanMs":7719.1,"MaxMs":11136.32,"Percent50":7303.17,"Percent75":8470.53,"Percent95":10346.5,"Percent99":10739.71,"StdDev":1356.04,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2184}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":859,"RPS":171.8,"Percent":28},"Latency":{"MinMs":10000.18,"MeanMs":10460.6,"MaxMs":11322.59,"Percent50":10354.69,"Percent75":10674.18,"Percent95":11239.42,"Percent99":11304.96,"StdDev":405.49,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":859}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":859,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2184,"RPS":436.8,"Percent":72},"Latency":{"MinMs":5478.78,"MeanMs":7719.1,"MaxMs":11136.32,"Percent50":7303.17,"Percent75":8470.53,"Percent95":10346.5,"Percent99":10739.71,"StdDev":1356.04,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2184}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":859,"RPS":171.8,"Percent":28},"Latency":{"MinMs":10000.18,"MeanMs":10460.6,"MaxMs":11322.59,"Percent50":10354.69,"Percent75":10674.18,"Percent95":11239.42,"Percent99":11304.96,"StdDev":405.49,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":859}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":859,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3043,"AllOkCount":2184,"AllFailCount":859,"AllBytes":0,"Duration":"00:00:50","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":2008,"RPS":401.6,"Percent":78},"Latency":{"MinMs":5618.07,"MeanMs":7672.3,"MaxMs":11109.53,"Percent50":7294.98,"Percent75":8503.3,"Percent95":10346.5,"Percent99":10608.64,"StdDev":1350.49,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2008}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":551,"RPS":110.2,"Percent":22},"Latency":{"MinMs":10000.17,"MeanMs":10466.32,"MaxMs":11394.73,"Percent50":10403.84,"Percent75":10633.22,"Percent95":11206.66,"Percent99":11288.58,"StdDev":388.74,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":551}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":551,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2008,"RPS":401.6,"Percent":78},"Latency":{"MinMs":5618.07,"MeanMs":7672.3,"MaxMs":11109.53,"Percent50":7294.98,"Percent75":8503.3,"Percent95":10346.5,"Percent99":10608.64,"StdDev":1350.49,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2008}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":551,"RPS":110.2,"Percent":22},"Latency":{"MinMs":10000.17,"MeanMs":10466.32,"MaxMs":11394.73,"Percent50":10403.84,"Percent75":10633.22,"Percent95":11206.66,"Percent99":11288.58,"StdDev":388.74,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":551}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":551,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2559,"AllOkCount":2008,"AllFailCount":551,"AllBytes":0,"Duration":"00:00:50","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":2952,"RPS":590.4,"Percent":97},"Latency":{"MinMs":2527.79,"MeanMs":5385.52,"MaxMs":11109.45,"Percent50":4915.2,"Percent75":6471.68,"Percent95":8814.59,"Percent99":10190.85,"StdDev":1821.35,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2952}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":106,"RPS":21.2,"Percent":3},"Latency":{"MinMs":10001.61,"MeanMs":10284.34,"MaxMs":11293.89,"Percent50":10125.31,"Percent75":10551.3,"Percent95":10682.37,"Percent99":11165.7,"StdDev":293.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":106}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":106,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2952,"RPS":590.4,"Percent":97},"Latency":{"MinMs":2527.79,"MeanMs":5385.52,"MaxMs":11109.45,"Percent50":4915.2,"Percent75":6471.68,"Percent95":8814.59,"Percent99":10190.85,"StdDev":1821.35,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2952}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":106,"RPS":21.2,"Percent":3},"Latency":{"MinMs":10001.61,"MeanMs":10284.34,"MaxMs":11293.89,"Percent50":10125.31,"Percent75":10551.3,"Percent95":10682.37,"Percent99":11165.7,"StdDev":293.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":106}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":106,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3058,"AllOkCount":2952,"AllFailCount":106,"AllBytes":0,"Duration":"00:00:50","SortIndex":2}]},{"Timestamp":"00:00:55","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":2536,"RPS":507.2,"Percent":76},"Latency":{"MinMs":6921.32,"MeanMs":9319.5,"MaxMs":12903.58,"Percent50":9043.97,"Percent75":10076.16,"Percent95":11870.21,"Percent99":12337.15,"StdDev":1313.57,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2536}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":783,"RPS":156.6,"Percent":24},"Latency":{"MinMs":9999.51,"MeanMs":11729.51,"MaxMs":13103.94,"Percent50":12083.2,"Percent75":12427.26,"Percent95":12836.86,"Percent99":12967.94,"StdDev":1008.82,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":783}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":783,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2536,"RPS":507.2,"Percent":76},"Latency":{"MinMs":6921.32,"MeanMs":9319.5,"MaxMs":12903.58,"Percent50":9043.97,"Percent75":10076.16,"Percent95":11870.21,"Percent99":12337.15,"StdDev":1313.57,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2536}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":783,"RPS":156.6,"Percent":24},"Latency":{"MinMs":9999.51,"MeanMs":11729.51,"MaxMs":13103.94,"Percent50":12083.2,"Percent75":12427.26,"Percent95":12836.86,"Percent99":12967.94,"StdDev":1008.82,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":783}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":783,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3319,"AllOkCount":2536,"AllFailCount":783,"AllBytes":0,"Duration":"00:00:55","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":2438,"RPS":487.6,"Percent":78},"Latency":{"MinMs":6921.57,"MeanMs":9293.95,"MaxMs":12513.03,"Percent50":9117.7,"Percent75":10158.08,"Percent95":11632.64,"Percent99":12075.01,"StdDev":1288.43,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2438}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":680,"RPS":136,"Percent":22},"Latency":{"MinMs":10001.87,"MeanMs":11603.86,"MaxMs":12971.63,"Percent50":12066.82,"Percent75":12214.27,"Percent95":12787.71,"Percent99":12853.25,"StdDev":946.31,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":680}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":680,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2438,"RPS":487.6,"Percent":78},"Latency":{"MinMs":6921.57,"MeanMs":9293.95,"MaxMs":12513.03,"Percent50":9117.7,"Percent75":10158.08,"Percent95":11632.64,"Percent99":12075.01,"StdDev":1288.43,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2438}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":680,"RPS":136,"Percent":22},"Latency":{"MinMs":10001.87,"MeanMs":11603.86,"MaxMs":12971.63,"Percent50":12066.82,"Percent75":12214.27,"Percent95":12787.71,"Percent99":12853.25,"StdDev":946.31,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":680}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":680,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":3118,"AllOkCount":2438,"AllFailCount":680,"AllBytes":0,"Duration":"00:00:55","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":2633,"RPS":526.6,"Percent":94},"Latency":{"MinMs":5105.63,"MeanMs":7369.76,"MaxMs":12392.27,"Percent50":6918.14,"Percent75":8429.57,"Percent95":10715.14,"Percent99":11812.86,"StdDev":1740.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2633}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":156,"RPS":31.2,"Percent":6},"Latency":{"MinMs":10001.55,"MeanMs":11343.77,"MaxMs":13094.28,"Percent50":11886.59,"Percent75":12115.97,"Percent95":12951.55,"Percent99":12951.55,"StdDev":1012.54,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":156}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":156,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":2633,"RPS":526.6,"Percent":94},"Latency":{"MinMs":5105.63,"MeanMs":7369.76,"MaxMs":12392.27,"Percent50":6918.14,"Percent75":8429.57,"Percent95":10715.14,"Percent99":11812.86,"StdDev":1740.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":2633}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":156,"RPS":31.2,"Percent":6},"Latency":{"MinMs":10001.55,"MeanMs":11343.77,"MaxMs":13094.28,"Percent50":11886.59,"Percent75":12115.97,"Percent95":12951.55,"Percent99":12951.55,"StdDev":1012.54,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":156}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":156,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2789,"AllOkCount":2633,"AllFailCount":156,"AllBytes":0,"Duration":"00:00:55","SortIndex":2}]},{"Timestamp":"00:01:00","ScenarioStats":[{"ScenarioName":"add_funds_scenario","Ok":{"Request":{"Count":1372,"RPS":274.4,"Percent":55},"Latency":{"MinMs":9567.13,"MeanMs":11594.67,"MaxMs":14501.45,"Percent50":11264,"Percent75":12263.42,"Percent95":13606.91,"Percent99":14360.58,"StdDev":1125.1,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1372}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1122,"RPS":224.4,"Percent":45},"Latency":{"MinMs":10000.43,"MeanMs":12955.99,"MaxMs":14691.32,"Percent50":13492.22,"Percent75":13811.71,"Percent95":14581.76,"Percent99":14598.14,"StdDev":1505.26,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1122}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1122,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":1372,"RPS":274.4,"Percent":55},"Latency":{"MinMs":9567.13,"MeanMs":11594.67,"MaxMs":14501.45,"Percent50":11264,"Percent75":12263.42,"Percent95":13606.91,"Percent99":14360.58,"StdDev":1125.1,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1372}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1122,"RPS":224.4,"Percent":45},"Latency":{"MinMs":10000.43,"MeanMs":12955.99,"MaxMs":14691.32,"Percent50":13492.22,"Percent75":13811.71,"Percent95":14581.76,"Percent99":14598.14,"StdDev":1505.26,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1122}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1122,"Percent":100}]},"SortIndex":0}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2494,"AllOkCount":1372,"AllFailCount":1122,"AllBytes":0,"Duration":"00:01:00","SortIndex":0},{"ScenarioName":"deduct_funds_scenario","Ok":{"Request":{"Count":1480,"RPS":296,"Percent":52},"Latency":{"MinMs":9463.66,"MeanMs":11467.36,"MaxMs":14409.15,"Percent50":11132.93,"Percent75":12107.78,"Percent95":13606.91,"Percent99":14229.5,"StdDev":1184.73,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1480}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1382,"RPS":276.4,"Percent":48},"Latency":{"MinMs":10000.89,"MeanMs":12902.34,"MaxMs":14679.54,"Percent50":13467.65,"Percent75":13869.06,"Percent95":14450.69,"Percent99":14598.14,"StdDev":1537.4,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1382}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1382,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":1480,"RPS":296,"Percent":52},"Latency":{"MinMs":9463.66,"MeanMs":11467.36,"MaxMs":14409.15,"Percent50":11132.93,"Percent75":12107.78,"Percent95":13606.91,"Percent99":14229.5,"StdDev":1184.73,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1480}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":1382,"RPS":276.4,"Percent":48},"Latency":{"MinMs":10000.89,"MeanMs":12902.34,"MaxMs":14679.54,"Percent50":13467.65,"Percent75":13869.06,"Percent95":14450.69,"Percent99":14598.14,"StdDev":1537.4,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1382}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":1382,"Percent":100}]},"SortIndex":1}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2862,"AllOkCount":1480,"AllFailCount":1382,"AllBytes":0,"Duration":"00:01:00","SortIndex":1},{"ScenarioName":"get_balance_scenario","Ok":{"Request":{"Count":1586,"RPS":317.2,"Percent":76},"Latency":{"MinMs":5827.11,"MeanMs":8981.79,"MaxMs":13925.18,"Percent50":8265.73,"Percent75":10903.55,"Percent95":13180.93,"Percent99":13795.33,"StdDev":2176.43,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1586}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":494,"RPS":98.8,"Percent":24},"Latency":{"MinMs":10000.64,"MeanMs":12898.69,"MaxMs":14596.37,"Percent50":13385.73,"Percent75":13656.06,"Percent95":14368.77,"Percent99":14598.14,"StdDev":1426.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":494}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":494,"Percent":100}]},"StepStats":[{"StepName":"global information","Ok":{"Request":{"Count":1586,"RPS":317.2,"Percent":76},"Latency":{"MinMs":5827.11,"MeanMs":8981.79,"MaxMs":13925.18,"Percent50":8265.73,"Percent75":10903.55,"Percent95":13180.93,"Percent99":13795.33,"StdDev":2176.43,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":1586}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":494,"RPS":98.8,"Percent":24},"Latency":{"MinMs":10000.64,"MeanMs":12898.69,"MaxMs":14596.37,"Percent50":13385.73,"Percent75":13656.06,"Percent95":14368.77,"Percent99":14598.14,"StdDev":1426.87,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":494}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[{"StatusCode":"EX_TaskCanceledException","IsError":true,"Message":"","Count":494,"Percent":100}]},"SortIndex":2}],"LoadSimulationStats":{"SimulationName":"inject","Value":1000},"CurrentOperation":"Bombing","AllRequestCount":2080,"AllOkCount":1586,"AllFailCount":494,"AllBytes":0,"Duration":"00:01:00","SortIndex":2}]}],
+                    "FinalMetrics": {"CounterMetrics":[],"GaugeMetrics":[{"ScenarioName":"","MetricName":"cpu:usage","UnitOfMeasure":"%","Current":25.014668492079014,"AgentValues":[],"History":{"00:00:05":0,"00:00:10":16.21,"00:00:15":13.01,"00:00:20":17.89,"00:00:25":16.75,"00:00:30":10.41,"00:00:35":20.69,"00:00:40":16.61,"00:00:45":12.73,"00:00:50":18.03,"00:00:55":17.3,"00:01:00":19.88,"00:01:05":25.01},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"memory:working-set","UnitOfMeasure":"MB","Current":503.300096,"AgentValues":[],"History":{"00:00:05":400.56,"00:00:10":419.1,"00:00:15":430.79,"00:00:20":512.47,"00:00:25":517.81,"00:00:30":501.77,"00:00:35":488.33,"00:00:40":491.97,"00:00:45":497.61,"00:00:50":502.31,"00:00:55":503.6,"00:01:00":507.03,"00:01:05":503.3},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"gc:heap-size","UnitOfMeasure":"MB","Current":63.946968,"AgentValues":[],"History":{"00:00:05":209.41,"00:00:10":215.35,"00:00:15":280.47,"00:00:20":271.04,"00:00:25":347.54,"00:00:30":-27.25,"00:00:35":63.6,"00:00:40":68.42,"00:00:45":173.53,"00:00:50":161.09,"00:00:55":303.52,"00:01:00":125.24,"00:01:05":63.95},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"gc:time-in-gc","UnitOfMeasure":"%","Current":83,"AgentValues":[],"History":{"00:00:05":65,"00:00:10":14,"00:00:15":61,"00:00:20":37,"00:00:25":40,"00:00:30":69,"00:00:35":60,"00:00:40":65,"00:00:45":67,"00:00:50":67,"00:00:55":75,"00:01:00":39,"00:01:05":83},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"gc:loh-size","UnitOfMeasure":"B","Current":5959528,"AgentValues":[],"History":{"00:00:05":5310088,"00:00:10":5441216,"00:00:15":5441216,"00:00:20":5959528,"00:00:25":5959528,"00:00:30":5959528,"00:00:35":5959528,"00:00:40":5959528,"00:00:45":5959528,"00:00:50":5959528,"00:00:55":5959528,"00:01:00":5959528,"00:01:05":5959528},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"threadpool:queue-length","UnitOfMeasure":"","Current":8087,"AgentValues":[],"History":{"00:00:05":1854,"00:00:10":0,"00:00:15":0,"00:00:20":3947,"00:00:25":3559,"00:00:30":337,"00:00:35":2050,"00:00:40":3053,"00:00:45":364,"00:00:50":2283,"00:00:55":3999,"00:01:00":7161,"00:01:05":8087},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"threadpool:thread-count","UnitOfMeasure":"","Current":37,"AgentValues":[],"History":{"00:00:05":32,"00:00:10":33,"00:00:15":34,"00:00:20":34,"00:00:25":34,"00:00:30":34,"00:00:35":37,"00:00:40":37,"00:00:45":37,"00:00:50":37,"00:00:55":37,"00:01:00":37,"00:01:05":37},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"data:received","UnitOfMeasure":"B","Current":36499775,"AgentValues":[],"History":{"00:00:05":3520167,"00:00:10":6050785,"00:00:15":9239858,"00:00:20":14709471,"00:00:25":19569040,"00:00:30":22396141,"00:00:35":24414176,"00:00:40":26590201,"00:00:45":29470992,"00:00:50":31699357,"00:00:55":33798465,"00:01:00":35119571,"00:01:05":36499775},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"data:sent","UnitOfMeasure":"B","Current":21492209,"AgentValues":[],"History":{"00:00:05":1957196,"00:00:10":3484796,"00:00:15":5325188,"00:00:20":8651091,"00:00:25":11213084,"00:00:30":13225298,"00:00:35":14561825,"00:00:40":15813440,"00:00:45":17394248,"00:00:50":18798642,"00:00:55":20084318,"00:01:00":20988626,"00:01:05":21492209},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"dns:lookups-requested","UnitOfMeasure":"","Current":15919,"AgentValues":[],"History":{"00:00:05":548,"00:00:10":1382,"00:00:15":1984,"00:00:20":4610,"00:00:25":6692,"00:00:30":6813,"00:00:35":8175,"00:00:40":9445,"00:00:45":10174,"00:00:50":11494,"00:00:55":12841,"00:01:00":15306,"00:01:05":15919},"RegisteredOnThisNode":true},{"ScenarioName":"","MetricName":"dns:lookups-duration","UnitOfMeasure":"ms","Current":5164.0682085813205,"AgentValues":[],"History":{"00:00:05":457.36,"00:00:10":721.71,"00:00:15":102.84,"00:00:20":1128.5,"00:00:25":4197.71,"00:00:30":4264.17,"00:00:35":1083.71,"00:00:40":873.53,"00:00:45":606.83,"00:00:50":303.36,"00:00:55":1467.55,"00:01:00":3183.72,"00:01:05":5164.07},"RegisteredOnThisNode":true}]},
+                    "Hints": [{"SourceName":"add_funds_scenario","SourceType":"Scenario","Hint":"Scenario: \u0027add_funds_scenario\u0027 didn\u0027t track status codes. In order to track status code, you should use Response.Ok(statusCode: value)"},{"SourceName":"add_funds_scenario","SourceType":"Scenario","Hint":"Scenario: \u0027add_funds_scenario\u0027 didn\u0027t track data transfer. In order to track data transfer, you should use Response.Ok(sizeInBytes: value)"},{"SourceName":"deduct_funds_scenario","SourceType":"Scenario","Hint":"Scenario: \u0027deduct_funds_scenario\u0027 didn\u0027t track status codes. In order to track status code, you should use Response.Ok(statusCode: value)"},{"SourceName":"deduct_funds_scenario","SourceType":"Scenario","Hint":"Scenario: \u0027deduct_funds_scenario\u0027 didn\u0027t track data transfer. In order to track data transfer, you should use Response.Ok(sizeInBytes: value)"},{"SourceName":"get_balance_scenario","SourceType":"Scenario","Hint":"Scenario: \u0027get_balance_scenario\u0027 didn\u0027t track status codes. In order to track status code, you should use Response.Ok(statusCode: value)"},{"SourceName":"get_balance_scenario","SourceType":"Scenario","Hint":"Scenario: \u0027get_balance_scenario\u0027 didn\u0027t track data transfer. In order to track data transfer, you should use Response.Ok(sizeInBytes: value)"}],
+                    "NBomberConfig": {
+  "GlobalSettings": {
+    "ScenariosSettings": [
+      {
+        "ScenarioName": "add_funds_scenario",
+        "WarmUpDuration": "00:00:30",
+        "LoadSimulationsSettings": [
+          {
+            "Inject": [
+              1000,
+              "00:00:01",
+              "00:05:30"
+            ]
+          }
+        ],
+        "ThresholdSettings": [],
+        "MaxFailCount": 5000
+      },
+      {
+        "ScenarioName": "deduct_funds_scenario",
+        "WarmUpDuration": "00:00:30",
+        "LoadSimulationsSettings": [
+          {
+            "Inject": [
+              1000,
+              "00:00:01",
+              "00:05:30"
+            ]
+          }
+        ],
+        "ThresholdSettings": [],
+        "MaxFailCount": 5000
+      },
+      {
+        "ScenarioName": "get_balance_scenario",
+        "WarmUpDuration": "00:00:30",
+        "LoadSimulationsSettings": [
+          {
+            "Inject": [
+              1000,
+              "00:00:01",
+              "00:05:30"
+            ]
+          }
+        ],
+        "ThresholdSettings": [],
+        "MaxFailCount": 5000
+      }
+    ],
+    "ReportingInterval": "00:00:05",
+    "EnableStopTestForcibly": false,
+    "ScenarioCompletionTimeout": "00:01:00",
+    "DisplayConsoleMetrics": true
+  }
+},
+                    "ClusterNodes": [{"NodeId":"","AgentGroup":"","NodeInfo":{"MachineName":"DESKTOP-FPDD7MH","NodeType":{"Case":"SingleNode"},"CurrentOperation":"Complete","OS":"Microsoft Windows NT 10.0.26200.0","DotNetVersion":".NETCoreApp,Version=v10.0","Processor":"AMD64 Family 23 Model 104 Stepping 1, AuthenticAMD","CoresCount":16,"NBomberVersion":"6.0.0"}}]
+                };
+
+                const emptyStep = {"StepName":"empty","Ok":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"Fail":{"Request":{"Count":0,"RPS":0,"Percent":0},"Latency":{"MinMs":0,"MeanMs":0,"MaxMs":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"LatencyCount":{"LessOrEq800":0,"More800Less1200":0,"MoreOrEq1200":0}},"DataTransfer":{"MinBytes":0,"MeanBytes":0,"MaxBytes":0,"Percent50":0,"Percent75":0,"Percent95":0,"Percent99":0,"StdDev":0,"AllBytes":0},"StatusCodes":[]},"SortIndex":0}
+                
+    </script>
+<script>const toKb = bytes => (bytes / 1024.0).toFixed(3);
+
+const toMb = bytes => (bytes / 1024.0 / 1024.0).toFixed(1);
+
+function prepareMetrics(metrics, datePrefix) {
+
+    metrics.CounterMetrics = metrics.CounterMetrics.map(counter => {
+        var newHistory = Object.entries(counter.History).map(([time, value]) => ({ Timestamp: `${datePrefix}-${time}`, Value: value }));
+        counter.History = newHistory;
+        counter.MetricType = "counter"
+        return counter;
+    });
+
+    metrics.GaugeMetrics = metrics.GaugeMetrics.map(gauge => {
+        var newHistory = Object.entries(gauge.History).map(([time, value]) => ({ Timestamp: `${datePrefix}-${time}`, Value: value }));
+        gauge.History = newHistory;
+        gauge.MetricType = "gauge"
+        return gauge;
+    });
+
+    return metrics.CounterMetrics.concat(metrics.GaugeMetrics);
+}
+
+function preparePluginsData(pluginsData) {
+    return pluginsData.map(x => x.Tables);
+}
+
+function prepareNodeInfo(nodeInfo) {
+    const newNodeInfo = { ...nodeInfo, NodeType: nodeInfo.NodeType.Case };
+    return newNodeInfo;
+}
+
+let emptySteps = {};
+
+function createEmptyStep(name) {
+    if (emptySteps[name]) {
+        return emptySteps[name];
+    }
+    else {
+        let updatedStep = Object.assign({}, emptyStep, { StepName: name });
+        emptySteps[name] = updatedStep;
+        return updatedStep;
+    }
+}
+
+function parseTestCreatedDate(testInfo) {
+    var created = testInfo.Created;
+    var date = moment(created);
+
+    if (!date.isValid())
+        date = moment();
+
+    var dateTime = date.format('MM/DD/YYYY, h:mm:ss');
+    var dateOnly = date.format('MM/DD/YYYY');
+
+    return { DateTime: dateTime, DateOnly: dateOnly };
+}
+
+moment.locale('en');
+
+const emitter = mitt();
+
+var app = Vue.createApp({
+    data() {
+        var date = parseTestCreatedDate(viewModel.FinalStats.TestInfo);
+
+        viewModel.FinalStats.TestInfo.Created = date;
+
+        var metrics = prepareMetrics(viewModel.FinalMetrics, date.DateOnly);
+        var plugins = preparePluginsData(viewModel.FinalStats.PluginsData);
+        var nodeInfo = prepareNodeInfo(viewModel.FinalStats.NodeInfo);
+
+        return {
+            currentView: "global-view",
+            currentScenarios: viewModel.FinalStats.ScenarioStats,
+            currentThresholds: viewModel.FinalStats.Thresholds,
+            currentScenarioName: null,
+            currentTestInfo: viewModel.FinalStats.TestInfo,
+            currentNodeInfo: nodeInfo,
+            currentHints: viewModel.Hints,
+            currentMetrics: metrics,
+            currentPlugins: plugins,
+            nbConfig: viewModel.NBomberConfig,
+            clusterNodes: viewModel.ClusterNodes,
+            viewModel: viewModel
+        }
+    },
+    methods: {
+        loadView(viewName, scenarioName) {
+
+            if (viewName === 'global-view') {
+                this.currentScenarios = viewModel.FinalStats.ScenarioStats;
+                this.currentThresholds = viewModel.FinalStats.Thresholds;
+                this.currentScenarioName = null;
+                this.currentStepsStatsHistory = null;
+            }
+            else if (viewName === 'cluster-view') {
+                this.currentScenarios = null;
+                this.currentScenarioName = null;
+                this.currentStepsStatsHistory = null;
+            }
+            else if (viewName === 'scenario-view') {
+                this.currentScenarios = viewModel.FinalStats.ScenarioStats.filter(x => x.ScenarioName === scenarioName);
+                this.currentThresholds = viewModel.FinalStats.Thresholds.filter(x => x.ScenarioName === scenarioName);
+                this.currentScenarioName = scenarioName;
+
+                var dateOnly = viewModel.FinalStats.TestInfo.Created.DateOnly;
+
+                var timeLineHistory = viewModel.TimeLineHistory.flatMap(x => x.ScenarioStats.filter(x => x.ScenarioName === scenarioName));
+
+                var stepsStatsHistory = [];
+
+                if (timeLineHistory.length > 0) {
+                    stepsStatsHistory = this.currentScenarios[0].StepStats
+                        .map(x => x.StepName)
+                        .map(stName => {
+
+                            var emptyStep = createEmptyStep(stName);
+
+                            return timeLineHistory.flatMap(scn => {
+                                var step = scn.StepStats.find(st => st.StepName === stName);
+
+                                if (step)
+                                    return {
+                                        Timestamp: `${dateOnly}-${scn.Duration}`,
+                                        Step: step,
+                                        Load: scn.LoadSimulationStats
+                                    }
+                                else
+                                    return {
+                                        Timestamp: `${dateOnly}-${scn.Duration}`,
+                                        Step: emptyStep,
+                                        Load: scn.LoadSimulationStats
+                                    }
+                            });
+                        });
+                }
+
+                this.currentStepsStatsHistory = stepsStatsHistory;
+            }
+            else if (viewName === 'hints-view') {
+                this.currentScenarios = viewModel.FinalStats.ScenarioStats;
+                this.currentScenarioName = null;
+                this.currentStepsStatsHistory = null;
+            }
+            else if (viewName === 'plugins-view') {
+                this.currentScenarios = viewModel.FinalStats.ScenarioStats;
+                this.currentScenarioName = null;
+                this.currentStepsStatsHistory = null;
+            }
+
+            this.currentView = viewName;
+        }
+    },
+    computed: {
+        currentProperties() {
+            return {
+                scenarioStats: this.currentScenarios,
+                thresholds: this.currentThresholds,
+                stepsStatsHistory: this.currentStepsStatsHistory,
+                testInfo: this.currentTestInfo,
+                nodeInfo: this.currentNodeInfo,
+                hints: this.currentHints,
+                plugins: this.currentPlugins,
+                metrics: this.currentMetrics,
+                nbConfig: this.nbConfig,
+                clusterNodes: this.clusterNodes
+            }
+        }
+    }
+})
+
+app
+    .component('global-view', {
+        props: ['scenarioStats', 'testInfo', 'nbConfig', 'thresholds'],
+        template: '#global-view',
+    })
+    .component('cluster-view', {
+        props: ['testInfo', 'nodeInfo', 'nbConfig', 'clusterNodes'],
+        template: '#cluster-view',
+    })
+    .component('scenario-view', {
+        props: ['stepsStatsHistory', 'scenarioStats', 'metrics', 'testInfo', 'thresholds'],
+        template: '#scenario-view',
+    })
+    .component('scenario-charts-view', {
+        props: ['stepsStatsHistory'],
+        template: '#scenario-charts-view',
+        methods: {
+            selectStep(stData) {
+                emitter.emit('onStepSelected', stData.Step.StepName)
+            }
+        }
+    })
+    .component('hints-view', {
+        props: ['hints', 'testInfo', 'scenarioStats'],
+        template: '#hints-view'
+    })
+    .component('plugins-view', {
+        props: ['testInfo', 'nodeInfo', 'scenarioStats', 'plugins'],
+        template: '#plugins-view'
+    })
+    .component('load-test-info', {
+        props: ['testInfo'],
+        template: `
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 mb-5">
+                        <h5 class="text-muted text-uppercase fw-semi-bold">Load test info</h5>
+                    </div>
+                    <div class="col-6 mb-5">
+                        <h5 class="text-uppercase">Test suite</h5>
+                        <p class="mb-0">{{ testInfo.TestSuite }}</p>
+                    </div>
+                    <div class="col-6 mb-5">
+                        <h5 class="text-uppercase">Test name</h5>
+                        <p class="mb-0">{{ testInfo.TestName }}</p>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-uppercase">Session id</h5>
+                        <p class="mb-0">{{ testInfo.SessionId }}</p>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-uppercase">Created</h5>
+                        <p class="mb-0">{{ testInfo.Created.DateTime }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `
+    })
+    .component('node-info', {
+        props: ['nodeInfo'],
+        template: `
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 mb-5">
+                        <h5 class="text-muted text-uppercase fw-semi-bold">Node info</h5>
+                    </div>
+                    <div class="col-6 mb-5">
+                        <h5 class="text-uppercase">Node type</h5>
+                        <p class="mb-0 badge bg-primary">{{ nodeInfo.NodeType }}</p>
+                    </div>
+                    <div class="col-6 mb-5">
+                        <h5 class="text-uppercase">OS</h5>
+                        <p class="mb-0">{{ nodeInfo.OS }}</p>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-uppercase">.NET Version</h5>
+                        <p class="mb-0">{{ nodeInfo.DotNetVersion }}</p>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-uppercase">CPU Cores</h5>
+                        <p class="mb-0">{{ nodeInfo.CoresCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `
+    })
+    .component('scenario-stats-table', {
+        props: ['isOk', 'scenarioStats'],
+        template: `
+        <div class="card h-100 shadow-lg p-3 mb-5 bg-white rounded-1">
+            <div class="card-body">
+
+                <template v-if="isOk === true || isOk === false && scenarioStats.filter(x => x.AllFailCount > 0).length > 0">
+
+                    <div class="col-12 mb-5">
+                        <template v-if="isOk === true">
+                            <h5 class="text-muted text-uppercase fw-semi-bold">Ok Statistics</h5>
+                        </template>
+                        <template v-else>
+                            <h5 class="text-muted text-uppercase fw-semi-bold">Failures Statistics</h5>
+                        </template>
+                    </div>
+                    <div class="table-responsive table-card">
+                        <table class="table table-bordered text-wrap table-centered mb-0 table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Scenario</th>
+                                    <th scope="col">Step</th>
+                                    <th scope="col">Information</th>
+                                    <th scope="col">Statistics</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template v-for="scn in scenarioStats">
+                                    <tr v-for="(st, index) in scn.StepStats.filter(x => isOk || !isOk && x.Fail.Request.Count > 0)">
+                                        <td>{{ index === 0 ? scn.ScenarioName : ''}}</td>
+
+                                        <td v-if="st.StepName !== 'global information'">{{st.StepName}}</td>
+                                        <td v-else><span style="font-size:3.5mm" class="badge bg-info">{{st.StepName}}</span></td>
+
+                                        <td v-if="index === 0">duration: {{scn.Duration}}</td>
+                                        <td v-else></td>
+
+                                        <template v-if="isOk === true">
+                                            <td><h5 style="display:inline">requests:</h5> all = {{st.Ok.Request.Count + st.Fail.Request.Count}}, <strong class="text-success">ok = {{st.Ok.Request.Count}}</strong>, <strong class="text-danger">fail = {{st.Fail.Request.Count}}</strong>, <strong>RPS = {{st.Ok.Request.RPS}}/s </strong>
+                                                <br>
+                                                <h5 style="display:inline">latency (ms):</h5> min = {{st.Ok.Latency.MinMs}}, mean = {{st.Ok.Latency.MeanMs}}, max = {{st.Ok.Latency.MaxMs}}, StdDev = {{st.Ok.Latency.StdDev}}
+                                                <br>
+                                                <h5 style="display:inline">latency percentile (ms):</h5> p50 = {{st.Ok.Latency.Percent50}}, p75 = {{st.Ok.Latency.Percent75}}, p95 = {{st.Ok.Latency.Percent95}}, p99 = {{st.Ok.Latency.Percent99}}
+                                                <br>
+                                                <h5 style="display:inline">data (KB):</h5> mean = {{ convertToKb(st.Ok.DataTransfer.MeanBytes) }}, max = {{ convertToKb(st.Ok.DataTransfer.MaxBytes) }}, all = {{ convertToMb(st.Ok.DataTransfer.AllBytes) }} MB
+                                                <br>
+                                            </td>
+                                        </template>
+                                        <template v-else>
+                                            <td><h5 style="display:inline">requests:</h5> all = {{st.Ok.Request.Count + st.Fail.Request.Count}}, <strong class="text-success">ok = {{st.Ok.Request.Count}}</strong>, <strong class="text-danger">fail = {{st.Fail.Request.Count}}</strong>, <strong>RPS = {{st.Fail.Request.RPS}}/s </strong>
+                                                <br>
+                                                <h5 style="display:inline">latency (ms):</h5> min = {{st.Fail.Latency.MinMs}}, mean = {{st.Fail.Latency.MeanMs}}, max = {{st.Fail.Latency.MaxMs}}, StdDev = {{st.Fail.Latency.StdDev}}
+                                                <br>
+                                                <h5 style="display:inline">latency percentile (ms):</h5> p50 = {{st.Fail.Latency.Percent50}}, p75 = {{st.Fail.Latency.Percent75}}, p95 = {{st.Fail.Latency.Percent95}}, p99 = {{st.Fail.Latency.Percent99}}
+                                                <br>
+                                                <h5 style="display:inline">data (KB):</h5> mean = {{ convertToKb(st.Fail.DataTransfer.MeanBytes) }}, max = {{ convertToKb(st.Fail.DataTransfer.MaxBytes) }}, all = {{ convertToMb(st.Fail.DataTransfer.AllBytes) }} MB
+                                                <br>
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </template>
+                <template v-else>
+                    <h5 class="text-muted text-uppercase fw-semi-bold">No Failures</h5>
+                </template>
+
+            </div>
+        </div>
+        `,
+        methods: {
+            convertToKb(bytes) {
+                return toKb(bytes);
+            },
+            convertToMb(bytes) {
+                return toMb(bytes);
+            }
+        }
+    })
+    .component('scenario-thresholds-table', {
+        props: ['thresholds'],
+        template: `
+        <div class="card h-100 shadow-lg p-3 mb-5 bg-white rounded-1">
+            <div class="card-body">
+
+                <template v-if="thresholds.length > 0">
+                    <div class="col-12">
+                        <div class="table-responsive table-card">
+                            <table class="table table-bordered text-wrap table-centered mb-0 table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-nowrap" scope="col">Scenario</th>
+                                        <th class="text-nowrap" scope="col">Step</th>
+                                        <th scope="col">Info</th>
+                                        <th scope="col">Errors count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="thr in thresholds">
+                                        <td v-if="thr.StepName"></td>
+                                        <td v-else>{{ thr.ScenarioName }}</td>
+
+                                        <td v-if="thr.StepName">{{ thr.StepName }}</td>
+                                        <td v-else><span style="font-size:3.5mm" class="badge bg-info">global information</span></td>
+
+                                        <td>
+                                            <p style="display:inline">status: </p>
+                                                <strong v-if="thr.IsFailed" class="text-danger">FAIL</strong>
+                                                <strong v-else class="text-success">OK</strong>
+                                            <br>
+                                            <p style="display:inline">check expression: </p>
+                                                <strong v-if="thr.CheckExpression">{{ thr.CheckExpression }}</strong>
+                                                <strong v-else>not available (configured in code)</strong>
+                                            <br>
+                                            <p v-if="thr.ExceptionMsg" style="display:inline">exception: {{ thr.ExceptionMsg }}</p>
+                                        </td>
+
+                                        <td>{{ thr.ErrorCount }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+                <template v-else>
+                    <h5 class="text-muted text-uppercase fw-semi-bold">No thresholds are defined</h5>
+                </template>
+
+            </div>
+        </div>
+        `
+    })
+    .component('scenario-status-code-table', {
+        props: ['scenarioStats'],
+        template: `
+        <div class="card h-100 shadow-lg p-3 mb-5 bg-white rounded-1">
+            <div class="card-body">
+                <div class="col-12 mb-5">
+                    <h5 class="text-muted text-uppercase fw-semi-bold">Status Codes</h5>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-12 col-xxl-8">
+                        <div class="table-responsive table-card">
+                            <table class="table table-bordered text-wrap table-centered mb-0 table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Status code</th>
+                                        <th scope="col">Count</th>
+                                        <th scope="col">Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="status in scenarioStats.Ok.StatusCodes.concat(scenarioStats.Fail.StatusCodes)">
+                                        <td v-if="!status.IsError"><strong class="text-success">{{ status.StatusCode }}</strong></td>
+                                        <td v-else><strong class="text-danger">{{ status.StatusCode }}</strong></td>
+                                        <td>{{ status.Count }}</td>
+                                        <td>{{ status.Message }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xxl-4">
+                        <chart-status-codes :status-codes="scenarioStats.Ok.StatusCodes.concat(scenarioStats.Fail.StatusCodes)"></chart-status-codes>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        `,
+        methods: {
+            convertToKb(bytes) {
+                return toKb(bytes);
+            },
+            convertToMb(bytes) {
+                return toMb(bytes);
+            }
+        }
+    })
+    .component('hints-table', {
+        props: ['hints'],
+        template: `
+        <div class="card h-100 shadow-lg p-3 mb-5 bg-white rounded-1">
+            <div class="card-body">
+                <div class="col-12">
+
+                    <div class="table-responsive table-card">
+                        <table class="table table-bordered text-wrap table-centered mb-0 table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-nowrap" scope="col">Source name</th>
+                                    <th class="text-nowrap" scope="col">Source type</th>
+                                    <th scope="col">Hint</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="hint in hints">
+                                    <td>{{ hint.SourceName }}</td>
+                                    <td>{{ hint.SourceType }}</td>
+                                    <td>{{ hint.Hint }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        `
+    })
+    .component('plugin-table', {
+        props: ['data'],
+        template: `
+        <div class="card h-100 shadow-lg p-3 mb-5 bg-white rounded-1">
+            <div class="card-body">
+                <div class="col-12 mb-5">
+                    <h5 class="text-muted text-uppercase fw-semi-bold">{{ data.TableName }}</h5>
+                </div>
+
+                <div class="col-12">
+
+                    <div class="table-responsive table-card">
+                        <table class="table table-bordered text-wrap table-centered mb-0 table-hover">
+                            <thead>
+                                <tr>
+                                    <th v-for="(value, key) in data.Rows[0]" class="text-nowrap" scope="col">{{ key }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="row in data.Rows">
+                                    <td v-for="value in row">{{ value }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        `
+    })
+    .component('metrics-charts', {
+        props: ['metrics'],
+        template: `
+        <template v-if="metrics.length > 0">
+            <div class="row">
+                <template v-for="m in metrics">
+
+                    <chart-metric :metric="m"></chart-metric>
+
+                </template>
+            </div>
+        </template>
+        <template v-else>
+            <h5 class="text-muted text-uppercase fw-semi-bold">No Data</h5>
+        </template>
+        `
+    })
+    .component('chart-metric', {
+        props: ['metric'],
+        template: `
+        <div class="col-xxl-4 col-12 mb-5">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <div class="col-12 mb-5">
+                        <h5 class="text-muted text-uppercase fw-semi-bold">{{ metric.MetricName }}</h5>
+                    </div>
+
+                    <apex-chart :options="convertToOptions(metric)"></apex-chart>
+
+                </div>
+            </div>
+        </div>
+        `,
+        methods: {
+            convertToOptions(metric) {
+
+                var options = {
+                    series: [{
+                        name: metric.MetricName,
+                        data: metric.History.map(x => [x.Timestamp, x.Value])
+                    }],
+                    chart: {
+                        type: 'line',
+                        stacked: false,
+                        height: 200,
+                        zoom: {
+                            type: 'x',
+                            enabled: false,
+                            autoScaleYaxis: true
+                        },
+                        toolbar: {
+                            autoSelected: 'zoom',
+                            tools: {
+                                download: false
+                            }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        dashArray: [0, 8]
+                    },
+                    markers: {
+                        size: 0,
+                    },
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'left'
+                    },
+                    yaxis: {
+                        title: {
+                            text: metric.UnitOfMeasure,
+                        }
+                    },
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: 'mm:ss',
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        x: {
+                            show: false,
+                            format: 'mm:ss'
+                        },
+                    },
+                };
+
+                return options;
+            }
+        }
+    })
+    .component('chart-status-codes', {
+        props: ['statusCodes'],
+        template: `
+            <apex-chart :options="convertToOptions(statusCodes)"></apex-chart>
+        `,
+        methods: {
+            convertToOptions(statusCodes) {
+
+                var options = {
+                    series: statusCodes.map(x => x.Count),
+                    chart: {
+                        width: 300,
+                        type: 'donut',
+                    },
+                    labels: statusCodes.map(x => x.StatusCode),
+                    dataLabels: {
+                        enabled: false
+                    },
+                    legend: {
+                        position: 'right',
+                        offsetY: 0,
+                        height: 230,
+                    }
+                };
+
+                return options;
+            }
+        }
+    })
+    .component('chart-scenario-throughput', {
+        props: ['stepTimeLine'],
+        template: `
+            <div class="col-12 mb-5">
+                <h5 class="text-muted text-uppercase fw-semi-bold">{{ title }}</h5>
+            </div>
+            <apex-chart :options="convertToOptions(stepTimeLine)"></apex-chart>
+        `,
+        data() {
+            return { title: 'Throughput' };
+        },
+        methods: {
+            convertToOptions(stepTimeLine) {
+
+                var options = {
+                    series: [
+                        {
+                            name: "RPS",
+                            data: stepTimeLine.map(x => [x.Timestamp, x.Step.Ok.Request.RPS])
+                        },
+                        {
+                            name: "Load",
+                            data: stepTimeLine.map(x => [x.Timestamp, x.Load.Value])
+                        }],
+                    chart: {
+                        type: 'line',
+                        stacked: false,
+                        height: 300,
+                        zoom: {
+                            type: 'x',
+                            enabled: true,
+                            autoScaleYaxis: true
+                        },
+                        toolbar: {
+                            autoSelected: 'zoom',
+                            tools: {
+                                download: false
+                            }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        dashArray: [0, 8]
+                    },
+                    markers: {
+                        size: 0,
+                    },
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'left'
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'RPS'
+                        }
+                    },
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: 'mm:ss',
+                        },
+                    },
+                    tooltip: {
+                        enabled: true,
+                        x: {
+                            show: false,
+                            format: 'mm:ss'
+                        },
+                    },
+                };
+
+                return options;
+            }
+        }
+    })
+    .component('chart-scenario-latency', {
+        props: ['stepTimeLine'],
+        template: `
+            <div class="col-12 mb-5">
+                <h5 class="text-muted text-uppercase fw-semi-bold">{{ title }}</h5>
+            </div>
+            <apex-chart :options="convertToOptions(stepTimeLine)"></apex-chart>
+        `,
+        data() {
+            return { title: 'Latency' };
+        },
+        methods: {
+            convertToOptions(stepTimeLine) {
+
+                var options = {
+                    series: [
+                        {
+                            name: "p50",
+                            data: stepTimeLine.map(x => [x.Timestamp, x.Step.Ok.Latency.Percent50])
+                        },
+                        {
+                            name: "p75",
+                            data: stepTimeLine.map(x => [x.Timestamp, x.Step.Ok.Latency.Percent75])
+                        },
+                        {
+                            name: "p95",
+                            data: stepTimeLine.map(x => [x.Timestamp, x.Step.Ok.Latency.Percent95])
+                        },
+                        {
+                            name: "p99",
+                            data: stepTimeLine.map(x => [x.Timestamp, x.Step.Ok.Latency.Percent99])
+                        },
+                        {
+                            name: "Load",
+                            data: stepTimeLine.map(x => [x.Timestamp, x.Load.Value])
+                        }],
+                    chart: {
+                        type: 'line',
+                        stacked: false,
+                        height: 300,
+                        zoom: {
+                            type: 'x',
+                            enabled: true,
+                            autoScaleYaxis: true
+                        },
+                        toolbar: {
+                            autoSelected: 'zoom',
+                            tools: {
+                                download: false
+                            }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        dashArray: [0, 0, 0, 0, 8]
+                    },
+                    markers: {
+                        size: 0,
+                    },
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'left'
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'ms'
+                        }
+                    },
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: 'mm:ss',
+                        },
+                    },
+                    tooltip: {
+                        enabled: true,
+                        x: {
+                            show: false,
+                            format: 'mm:ss'
+                        },
+                    },
+                };
+
+                return options;
+            }
+        }
+    })
+    .component('chart-latency-indicators', {
+        props: ['isScenarioView', 'scenarioStats'],
+        template: `
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="col-12 mb-5">
+                    <h5 class="text-muted text-uppercase fw-semi-bold">{{ title }}</h5>
+                </div>
+
+                <apex-chart :options="chartOptions" :key="myKey"></apex-chart>
+            </div>
+        </div>
+        `,
+        mounted() {
+            emitter.on('onStepSelected', this.loadStepLatencyIndicators);
+        },
+        unmounted() {
+            emitter.off('onStepSelected', this.loadStepLatencyIndicators);
+        },
+        data() {
+
+            let title = this.isScenarioView === true
+                ? `latency indicators - ${this.scenarioStats[0].ScenarioName}`
+                : 'latency indicators - all scenarios';
+
+            return {
+                title: title,
+                chartOptions: this.buildChartOptions(this.scenarioStats),
+                myKey:  1
+            }
+        },
+        methods: {
+
+            loadStepLatencyIndicators(stepName) {
+                let stepStats = this.scenarioStats[0].StepStats.find(x => x.StepName === stepName);
+
+                let lessOrEq800 = stepStats.Ok.Latency.LatencyCount.LessOrEq800;
+                let more800Less1200 = stepStats.Ok.Latency.LatencyCount.More800Less1200;
+                let moreOrEq1200 = stepStats.Ok.Latency.LatencyCount.MoreOrEq1200;
+                let fails = stepStats.Fail.Request.Count;
+
+                this.chartOptions.series = [{
+                    name: '',
+                    data: [lessOrEq800, more800Less1200, moreOrEq1200, fails]
+                }];
+
+                let title = stepName === 'global information'
+                    ? `latency indicators - ${this.scenarioStats[0].ScenarioName}`
+                    : `latency indicators - ${stepName}`;
+
+                this.title = title;
+                this.myKey = this.myKey + 1 // it's needed for re-rendering
+            },
+
+            buildChartOptions(scenarioStats) {
+
+                // we take 'global info' steps and sum up their numbers
+                let lessOrEq800 = scenarioStats.map(x => x.StepStats[0].Ok.Latency.LatencyCount.LessOrEq800).reduce((a, b) => a + b, 0)
+                let more800Less1200 = scenarioStats.map(x => x.StepStats[0].Ok.Latency.LatencyCount.More800Less1200).reduce((a, b) => a + b, 0)
+                let moreOrEq1200 = scenarioStats.map(x => x.StepStats[0].Ok.Latency.LatencyCount.MoreOrEq1200).reduce((a, b) => a + b, 0)
+                let fails = scenarioStats.map(x => x.StepStats[0].Fail.Request.Count).reduce((a, b) => a + b, 0)
+
+                let options = {
+                    series: [{
+                        name: '',
+                        data: [lessOrEq800, more800Less1200, moreOrEq1200, fails]
+                    }],
+                    chart: {
+                        height: 150,
+                        type: 'bar',
+                        toolbar: {
+                            show: false
+                        },
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: '45%',
+                            distributed: true,
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    legend: {
+                        show: false
+                    },
+                    xaxis: {
+                        categories: ['t < 800ms', '800ms < t < 1.2s', 't > 1.2s', 'failed'],
+                        labels: {
+                            style: {
+                                fontSize: '12px'
+                            }
+                        }
+                    }
+                };
+
+                return options;
+            }
+        }
+    })
+    .component('apex-chart', {
+        props: ['options'],
+        template: `
+            <div ref="container"></div>
+        `,
+        mounted() {
+            var chart = new ApexCharts(this.$refs.container, this.options);
+            chart.render();
+        }
+    })
+    .component('prism-json', {
+        props: ['jsonBody'],
+        template: `<pre style="background: #f9fafb;"><code ref="container" class="language-json">{{ jsonBody }}</code></pre>`,
+        mounted() {
+            Prism.highlightElement(this.$refs.container);
+        }
+    })
+    .component('cluster-nodes-table', {
+        props: ['nodes'],
+        template: `
+        <div class="card h-100 shadow-lg p-3 mb-5 bg-white rounded-1">
+            <div class="card-body">
+                <div class="col-12 mb-5">
+                    <h5 class="text-muted text-uppercase fw-semi-bold">Cluster nodes</h5>
+                </div>
+
+                <div class="col-12">
+
+                    <div class="table-responsive table-card">
+                        <table class="table table-bordered text-wrap table-centered mb-0 table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Node Id</th>
+                                    <th scope="col">Node Type</th>
+                                    <th scope="col">Agent Group</th>
+                                    <th scope="col">Processor</th>
+                                    <th scope="col">CPU Cores</th>
+                                    <th scope="col">OS</th>
+                                    <th scope="col">NBomber Version</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="n in nodes">
+                                    <td>{{ n.NodeId }}</td>
+                                    <td>{{ n.NodeInfo.NodeType.Case }}</td>
+                                    <td>{{ n.AgentGroup }}</td>
+                                    <td>{{ n.NodeInfo.Processor }}</td>
+                                    <td>{{ n.NodeInfo.CoresCount }}</td>
+                                    <td>{{ n.NodeInfo.OS }}</td>
+                                    <td>{{ n.NodeInfo.NBomberVersion }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        `
+    })
+    .mount("#app");
+</script>
+</body>
+</html>

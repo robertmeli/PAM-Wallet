@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Wallet.Domain/Wallet.Domain.csproj" />
+    <Project Path="src/Wallet.Application/Wallet.Application.csproj" />
+    <Project Path="src/Wallet.Api/Wallet.Api.csproj" />
+    <Project Path="src/Wallet.Infrastructure/Persistence.Postgres/Wallet.Infrastructure.Persistence.Postgres.csproj" />
+    <Project Path="src/Wallet.Infrastructure/Messaging.Kafka/Wallet.Infrastructure.Messaging.Kafka.csproj" />
+    <Project Path="src/Wallet.Infrastructure/Orchestration.Orleans/Wallet.Infrastructure.Orchestration.Orleans.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Wallet.UnitTests/Wallet.UnitTests.csproj" />
+    <Project Path="tests/Wallet.ComponentTests/Wallet.ComponentTests.csproj" />
+    <Project Path="tests/Wallet.IntegrationTests/Wallet.IntegrationTests.csproj" />
+    <Project Path="tests/Wallet.PerformanceTests/Wallet.PerformanceTests.csproj" />
+  </Folder>
+  <Folder Name="/host/">
+    <Project Path="PAM-Wallet.AppHost/PAM-Wallet.AppHost.csproj" />
+    <Project Path="PAM-Wallet.ServiceDefaults/PAM-Wallet.ServiceDefaults.csproj" />
+  </Folder>
+</Solution>

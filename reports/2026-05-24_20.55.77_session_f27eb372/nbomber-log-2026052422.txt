@@ -1,0 +1,11 @@
+2026-05-24 22:55:13.850 +02:00 [INF] [ThreadId:5] NBomber 6.0.0 started a new session: 2026-05-24_20.55.77_session_f27eb372
+2026-05-24 22:55:13.907 +02:00 [INF] [ThreadId:5] NBomber started as single node
+2026-05-24 22:55:13.910 +02:00 [INF] [ThreadId:5] License validation....
+2026-05-24 22:55:13.911 +02:00 [WRN] [ThreadId:5] THIS VERSION IS FREE ONLY FOR PERSONAL USE. You can't use it for an organization.
+2026-05-24 22:55:13.925 +02:00 [INF] [ThreadId:5] Reports folder: C:\dev\PAM-Wallet\tests\Wallet.PerformanceTests\bin\Debug\net10.0\reports\2026-05-24_20.55.77_session_f27eb372
+2026-05-24 22:55:13.927 +02:00 [INF] [ThreadId:5] Plugins: no plugins were loaded
+2026-05-24 22:55:13.928 +02:00 [INF] [ThreadId:5] Reporting sinks: no reporting sinks were loaded
+2026-05-24 22:55:13.928 +02:00 [INF] [ThreadId:5] Starting init...
+2026-05-24 22:55:13.938 +02:00 [INF] [ThreadId:5] Target scenarios: add_funds_scenario
+2026-05-24 22:55:13.941 +02:00 [INF] [ThreadId:5] Init finished
+2026-05-24 22:55:13.961 +02:00 [INF] [ThreadId:5] Starting bombing...

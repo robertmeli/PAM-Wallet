@@ -1,0 +1,19 @@
+2026-05-25 10:27:44.268 +02:00 [INF] [ThreadId:7] NBomber 6.0.0 started a new session: 2026-05-25_08.27.21_session_e8fe6bd4
+2026-05-25 10:27:44.316 +02:00 [INF] [ThreadId:7] NBomber started as single node
+2026-05-25 10:27:44.319 +02:00 [INF] [ThreadId:7] License validation....
+2026-05-25 10:27:44.319 +02:00 [WRN] [ThreadId:7] THIS VERSION IS FREE ONLY FOR PERSONAL USE. You can't use it for an organization.
+2026-05-25 10:27:44.334 +02:00 [INF] [ThreadId:7] Reports folder: C:\dev\PAM-Wallet\tests\Wallet.PerformanceTests\bin\Debug\net10.0\reports\2026-05-25_08.27.21_session_e8fe6bd4
+2026-05-25 10:27:44.335 +02:00 [INF] [ThreadId:7] Plugins: no plugins were loaded
+2026-05-25 10:27:44.336 +02:00 [INF] [ThreadId:7] Reporting sinks: no reporting sinks were loaded
+2026-05-25 10:27:44.336 +02:00 [INF] [ThreadId:7] Starting init...
+2026-05-25 10:27:44.344 +02:00 [INF] [ThreadId:7] Target scenarios: create_wallet_scenario, add_funds_scenario, deduct_funds_scenario, get_balance_scenario
+2026-05-25 10:27:44.346 +02:00 [INF] [ThreadId:7] Init finished
+2026-05-25 10:27:44.392 +02:00 [INF] [ThreadId:7] Starting warm up...
+2026-05-25 10:27:44.393 +02:00 [INF] [ThreadId:7] Warm up for scenarios: create_wallet_scenario, add_funds_scenario, deduct_funds_scenario, get_balance_scenario
+2026-05-25 10:27:44.397 +02:00 [INF] [ThreadId:7] Warm up duration: 00:00:30
+2026-05-25 10:28:30.123 +02:00 [INF] [ThreadId:9] Starting bombing...
+2026-05-25 10:29:22.150 +02:00 [INF] [ThreadId:9] Waiting on scenarios completion...
+2026-05-25 10:29:26.076 +02:00 [INF] [ThreadId:214] Calculating final statistics...
+2026-05-25 10:29:28.151 +02:00 [WRN] [ThreadId:18] Stopping test early: Stopping test because of too many fails. Scenario 'create_wallet_scenario' contains '11387' fails.
+2026-05-25 10:29:28.163 +02:00 [INF] [ThreadId:221] Reports saved in folder: C:\dev\PAM-Wallet\reports\2026-05-25_08.27.21_session_e8fe6bd4
+2026-05-25 10:29:28.164 +02:00 [WRN] [ThreadId:221] THIS VERSION IS FREE ONLY FOR PERSONAL USE. You can't use it for an organization.
