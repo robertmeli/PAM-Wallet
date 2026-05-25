@@ -259,6 +259,15 @@ Observed run summary from the captured output:
   - `>=5s: 278042`
   - `>=30s: 0`
 
+Successful outcomes in the same run:
+
+- Very high completion ratio: `300000 / 300000` requests succeeded.
+- Success rate: `100%`.
+- Sustained throughput remained at target (`1000 RPS`).
+- Successful request latency stats: `min 8.3ms`, `mean 117.04ms`, `max 6392.11ms`, `StdDev 284.71ms`.
+- Successful request percentiles: `p50 24.05ms`, `p75 78.14ms`, `p95 617.47ms`, `p99 1179.65ms`.
+- No extreme 30s tail events were observed (`>=30s: 0`).
+
 Why the `>=5s` counter can be very high in this run:
 
 - `add_funds` is a write-heavy path (wallet write + outbox write + Orleans orchestration), so queueing effects are much stronger than in `balance`.
