@@ -1,0 +1,16 @@
+2026-05-24 17:09:54.422 +02:00 [INF] [ThreadId:7] NBomber 6.0.0 started a new session: 2026-05-24_15.09.22_session_8d6a2bef
+2026-05-24 17:09:54.611 +02:00 [INF] [ThreadId:7] NBomber started as single node
+2026-05-24 17:09:54.628 +02:00 [INF] [ThreadId:7] License validation....
+2026-05-24 17:09:54.634 +02:00 [WRN] [ThreadId:7] THIS VERSION IS FREE ONLY FOR PERSONAL USE. You can't use it for an organization.
+2026-05-24 17:09:54.672 +02:00 [INF] [ThreadId:7] Reports folder: C:\dev\PAM-Wallet\tests\Wallet.PerformanceTests\bin\Debug\net10.0\reports\2026-05-24_15.09.22_session_8d6a2bef
+2026-05-24 17:09:54.674 +02:00 [INF] [ThreadId:7] Plugins: no plugins were loaded
+2026-05-24 17:09:54.675 +02:00 [INF] [ThreadId:7] Reporting sinks: no reporting sinks were loaded
+2026-05-24 17:09:54.676 +02:00 [INF] [ThreadId:7] Starting init...
+2026-05-24 17:09:54.701 +02:00 [INF] [ThreadId:7] Target scenarios: add_funds_scenario
+2026-05-24 17:09:54.707 +02:00 [INF] [ThreadId:7] Init finished
+2026-05-24 17:09:54.763 +02:00 [INF] [ThreadId:7] Starting bombing...
+2026-05-24 17:10:26.341 +02:00 [INF] [ThreadId:20] Waiting on scenarios completion...
+2026-05-24 17:10:37.211 +02:00 [WRN] [ThreadId:5] Stopping test early: stop command activated by CLI
+2026-05-24 17:10:59.440 +02:00 [INF] [ThreadId:14] Calculating final statistics...
+2026-05-24 17:11:00.231 +02:00 [INF] [ThreadId:14] Reports saved in folder: C:\dev\PAM-Wallet\reports\2026-05-24_15.09.22_session_8d6a2bef
+2026-05-24 17:11:00.233 +02:00 [WRN] [ThreadId:14] THIS VERSION IS FREE ONLY FOR PERSONAL USE. You can't use it for an organization.

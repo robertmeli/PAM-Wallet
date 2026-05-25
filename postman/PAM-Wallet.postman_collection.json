@@ -1,0 +1,148 @@
+{
+  "info": {
+    "name": "PAM Wallet API",
+    "description": "Postman collection for Player Wallet endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "8c6f5fd7-e3aa-4f58-9f2f-2d07b2d83b8d"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "playerId",
+      "value": "player-1"
+    },
+    {
+      "key": "addAmount",
+      "value": "100.00"
+    },
+    {
+      "key": "deductAmount",
+      "value": "25.00"
+    },
+    {
+      "key": "walletType",
+      "value": "Main"
+    },
+    {
+      "key": "currencyType",
+      "value": "EUR"
+    },
+    {
+      "key": "expiresAt",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Wallet",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"walletType\": \"{{walletType}}\",\n  \"currencyType\": \"{{currencyType}}\",\n  \"expiresAt\": \"{{expiresAt}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/wallets/{{playerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "wallets",
+            "{{playerId}}"
+          ]
+        },
+        "description": "Creates a wallet for the given player with wallet/currency type and optional expiry."
+      },
+      "response": []
+    },
+    {
+      "name": "Add Funds",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": {{addAmount}},\n  \"walletType\": \"{{walletType}}\",\n  \"currencyType\": \"{{currencyType}}\",\n  \"expiresAt\": \"{{expiresAt}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/wallets/{{playerId}}/funds/add",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "wallets",
+            "{{playerId}}",
+            "funds",
+            "add"
+          ]
+        },
+        "description": "Adds funds to the wallet for the given player. Metadata fields are used when wallet is auto-created."
+      },
+      "response": []
+    },
+    {
+      "name": "Deduct Funds",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": {{deductAmount}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/wallets/{{playerId}}/funds/deduct",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "wallets",
+            "{{playerId}}",
+            "funds",
+            "deduct"
+          ]
+        },
+        "description": "Deducts funds from the wallet for the given player."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Balance",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/wallets/{{playerId}}/balance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "wallets",
+            "{{playerId}}",
+            "balance"
+          ]
+        },
+        "description": "Returns current wallet balance plus wallet type, currency type, createdAt and expiresAt."
+      },
+      "response": []
+    }
+  ]
+}
